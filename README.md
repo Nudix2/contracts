@@ -1,19 +1,10 @@
-## Foundry
+# Nudix
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
+## Project description
 
 ## Usage
+
+The project was implemented using the [Foundry framework](https://book.getfoundry.sh/).
 
 ### Build
 
@@ -27,35 +18,30 @@ $ forge build
 $ forge test
 ```
 
+### Test coverage
+
+```shell
+$ forge coverage
+```
+
 ### Format
 
 ```shell
 $ forge fmt
 ```
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+Deployment of smart contracts is supposed to be via a deployment script from `/script` folder.
 
-### Cast
+1. Create `.env` file
+2. You need to add the deployer's private key to `.env` according to .env.example
+3. Run script
+   ```shell
+     $ forge script script/DeployNudixShare.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --slow --broadcast --verify
+   ```
 
-```shell
-$ cast <subcommand>
-```
+Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.
 
 ### Help
 
