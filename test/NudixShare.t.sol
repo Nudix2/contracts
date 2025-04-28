@@ -29,10 +29,11 @@ contract NudixShareTest is Test {
         (user, userPrivateKey) = makeAddrAndKey("user");
 
         // Deploy the token contract
-        token = new NudixShare(admin, minter);
+        token = new NudixShare(admin);
 
-        console.log(token.hasRole(token.DEFAULT_ADMIN_ROLE(), admin));
-        console.log(admin);
+        vm.startPrank(admin);
+        token.grantRole(token.MINTER_ROLE(), minter);
+        vm.stopPrank();
     }
 
     // region - Deploy -

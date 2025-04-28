@@ -54,12 +54,11 @@ contract NudixShare is ERC20Permit, ERC20Burnable, AccessControl {
     /// @notice Emitted when an address is added to the whitelist
     event Whitelisted(address indexed account);
 
-    constructor(address admin, address minter)
+    constructor(address admin)
         ERC20("Nudix Share", "NUDIX-S")
         ERC20Permit("NudixShare")
     {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(MINTER_ROLE, minter);
     }
 
     // region - Mint logic -

@@ -4,7 +4,7 @@ out = "out"
 libs = ["lib"]
 solc = "0.8.25"
 optimizer = true
-optimizer_runs = 10000 #TODO check gas spending
+optimizer_runs = 10000
 verbosity = 2
 
 [rpc_endpoints]
@@ -13,7 +13,7 @@ bsc-mainnet = "${BSC_MAINNET_RPC_URL}"
 bsc-testnet = "${BSC_TESTNET_RPC_URL}"
 
 [etherscan]
-bsc-mainnet = {key = "${BSCSCAN_API_KEY}", chain = "56", url = "https://api.bscscan.com/api"}
-bsc-testnet = {key = "${BSCSCAN_API_KEY}", chain = "97", url = "https://api-testnet.bscscan.com/api"}
+bsc-mainnet = {key = "${ETHERSCAN_API_KEY}", chain = "56", url = "https://api.etherscan.io/v2/api"}
+bsc-testnet = {key = "${ETHERSCAN_API_KEY}", chain = "97", url = "https://api.etherscan.io/v2/api"}
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

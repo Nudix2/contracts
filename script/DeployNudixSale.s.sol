@@ -3,22 +3,24 @@ pragma solidity 0.8.25;
 
 import {Script, console} from "forge-std/Script.sol";
 
-import {NudixShare} from "src/NudixShare.sol";
+import {NudixSale} from "src/NudixSale.sol";
 
-contract DeployNudixShare is Script {
-    NudixShare nudixShare;
+contract DeployNudixSale is Script {
+    NudixSale nudixSale;
 
-    function run(address admin) public {
+    function run(address nudixShare, address paymentToken, address wallet, address initialOwner)
+        public
+    {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
 
-        nudixShare = new NudixShare(admin);
+        nudixSale = new NudixSale(nudixShare, paymentToken, wallet, initialOwner);
 
         vm.stopBroadcast();
 
         console.log("------------------ Deployed contracts --------------------");
-        console.log("NudixShare: ", address(nudixShare));
+        console.log("NudixSale: ", address(nudixSale));
         console.log("------------------ Deployment info -----------------------");
         console.log("Chain ID: ", block.chainid);
         console.log("Deployer: ", vm.addr(deployerPrivateKey));

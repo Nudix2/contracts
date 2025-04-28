@@ -1,0 +1,496 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+
+import {Test, console} from "forge-std/Test.sol";
+
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
+import {NudixSale, Sale} from "src/NudixSale.sol";
+import {NudixShare} from "src/NudixShare.sol";
+
+contract NudixSaleTest is Test {
+    ERC20Mock paymentToken;
+    NudixShare shareToken;
+    NudixSale sale;
+
+    uint256 constant VALUE = 100e18;
+    uint256 constant MIN_PURCHASE = 1e18;
+    uint256 constant ROUND_RATE = 1e18;
+    uint256 constant ROUND_CAP = 100_000e18;
+
+    address owner;
+    address wallet;
+    address hacker;
+    address user;
+
+    function setUp() public {
+        owner = makeAddr("owner");
+        wallet = makeAddr("wallet");
+        hacker = makeAddr("hacker");
+        user = makeAddr("user");
+
+        shareToken = new NudixShare(owner);
+        paymentToken = new ERC20Mock(18);
+
+        sale = new NudixSale(address(shareToken), address(paymentToken), wallet, owner);
+
+        vm.startPrank(owner);
+        shareToken.grantRole(shareToken.MINTER_ROLE(), address(sale));
+        vm.stopPrank();
+    }
+
+    // region - Deploy -
+
+    function test_deploy_revertIfZeroAddress() public {
+        // First case: shareToken == address(0)
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        sale = new NudixSale(address(0), address(paymentToken), wallet, owner);
+
+        // Second case: paymentToken == address(0)
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        sale = new NudixSale(address(shareToken), address(0), wallet, owner);
+
+        // Third case: wallet == address(0)
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        sale = new NudixSale(address(shareToken), address(paymentToken), address(0), owner);
+    }
+
+    function test_deploy_success() public view {
+        assertEq(sale.getWallet(), wallet);
+        assertEq(sale.getShareToken(), address(shareToken));
+        assertEq(sale.getPaymentToken(), address(paymentToken));
+        assertEq(sale.getCurrentSaleId(), 0);
+        assertEq(sale.owner(), owner);
+
+        assertEq(paymentToken.decimals(), 18);
+    }
+
+    // endregion
+
+    // region - Start sale -
+
+    function _getDefaultSale() private view returns (Sale memory) {
+        return Sale({
+            startTime: block.timestamp,
+            minPurchase: MIN_PURCHASE,
+            roundRate: ROUND_RATE,
+            roundCap: ROUND_CAP,
+            totalInvestment: 0,
+            finalized: false
+        });
+    }
+
+    function test_startSale_revertIfNotOwner() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, hacker));
+
+        vm.prank(hacker);
+        sale.startSale(_getDefaultSale());
+    }
+
+    function test_startSale_revertIfCurrentSaleIsActive() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.expectRevert(NudixSale.CurrentSaleMustNotBeActive.selector);
+
+        sale.startSale(_getDefaultSale());
+        vm.stopPrank();
+    }
+
+    function test_startSale_revertIfIncorrectStartTime() public {
+        vm.expectRevert(NudixSale.IncorrectStartTime.selector);
+
+        vm.warp(block.timestamp + 1);
+
+        vm.prank(owner);
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp - 1,
+                minPurchase: MIN_PURCHASE,
+                roundRate: ROUND_RATE,
+                roundCap: ROUND_CAP,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+    }
+
+    function test_startSale_revertIfZeroParam() public {
+        vm.startPrank(owner);
+
+        // First case: roundRate == 0
+        uint256 roundRate = 0;
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroParam.selector));
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp,
+                minPurchase: MIN_PURCHASE,
+                roundRate: roundRate,
+                roundCap: ROUND_CAP,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+
+        // Second case: roundCap == 0
+        uint256 roundCap = 0;
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroParam.selector));
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp,
+                minPurchase: MIN_PURCHASE,
+                roundRate: ROUND_RATE,
+                roundCap: roundCap,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+
+        vm.stopPrank();
+    }
+
+    function test_startSale_revertIfBelowMinPurchase() public {
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.BelowMinPurchase.selector, MIN_PURCHASE));
+
+        uint256 minPurchase = 0;
+
+        vm.prank(owner);
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp,
+                minPurchase: minPurchase,
+                roundRate: ROUND_RATE,
+                roundCap: ROUND_CAP,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+    }
+
+    function test_startSale_success() public {
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        Sale memory currentSale = sale.getCurrentSale();
+
+        assertEq(currentSale.startTime, block.timestamp);
+        assertEq(currentSale.minPurchase, MIN_PURCHASE);
+        assertEq(currentSale.roundRate, ROUND_RATE);
+        assertEq(currentSale.roundCap, ROUND_CAP);
+        assertEq(currentSale.totalInvestment, 0);
+        assertEq(currentSale.finalized, false);
+    }
+
+    function test_startSale_emitSaleStarted() public {
+        uint8 saleId = 1;
+
+        vm.expectEmit(true, false, false, true);
+        emit NudixSale.SaleStarted(saleId, _getDefaultSale());
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+    }
+
+    function test_startSale_severalTimes() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+        sale.stopSale();
+
+        sale.startSale(_getDefaultSale());
+        sale.stopSale();
+
+        sale.startSale(_getDefaultSale());
+        sale.stopSale();
+    }
+
+    // endregion
+
+    // region - Stop sale -
+
+    function test_stopSale_revertIfNotOwner() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, hacker));
+
+        vm.prank(hacker);
+        sale.stopSale();
+    }
+
+    function test_stopSale_revertIfSaleIsFinalized() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+
+        sale.stopSale();
+
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleIsFinalized.selector));
+
+        sale.stopSale();
+        vm.stopPrank();
+    }
+
+    function test_stopSale_success() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+
+        sale.stopSale();
+        vm.stopPrank();
+
+        assertEq(sale.getCurrentSale().finalized, true);
+    }
+
+    function test_stopSale_emitSaleFinalized() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.expectEmit(true, false, false, false);
+        emit NudixSale.SaleFinalized(sale.getCurrentSaleId());
+
+        sale.stopSale();
+        vm.stopPrank();
+    }
+
+    // endregion
+
+    // region - Buy -
+
+    function test_buy_revertIfSaleIsFinalized() public {
+        vm.startPrank(owner);
+        sale.startSale(_getDefaultSale());
+        sale.stopSale();
+        vm.stopPrank();
+
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleIsFinalized.selector));
+        sale.buy(1);
+    }
+
+    function test_buy_revertIfSaleNotInitialized() public {
+        // First case: saleId == 0
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleNotInitialized.selector));
+        vm.prank(user);
+        sale.buy(VALUE);
+    }
+
+    function test_buy_revertIfSaleNotStarted() public {
+        vm.prank(owner);
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp + 1 days,
+                minPurchase: MIN_PURCHASE,
+                roundRate: ROUND_RATE,
+                roundCap: ROUND_CAP,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleNotStarted.selector));
+
+        vm.prank(user);
+        sale.buy(VALUE);
+    }
+
+    function test_buy_revertIfMaxCapReached() public {
+        uint256 reachedAmount = ROUND_CAP + 1;
+        paymentToken.mint(user, reachedAmount);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.expectRevert(abi.encodeWithSelector(NudixSale.MaxCapReached.selector));
+
+        vm.prank(user);
+        sale.buy(reachedAmount);
+    }
+
+    function test_buy_success(uint256 amount) public {
+        amount = bound(amount, MIN_PURCHASE, ROUND_CAP);
+
+        paymentToken.mint(user, amount);
+        vm.prank(user);
+        paymentToken.approve(address(sale), amount);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.prank(user);
+        sale.buy(amount);
+
+        assertEq(shareToken.balanceOf(user), amount);
+        assertEq(paymentToken.balanceOf(user), 0);
+        assertEq(paymentToken.balanceOf(wallet), sale.getCurrentPrice(amount));
+        assertEq(sale.getCurrentSale().totalInvestment, amount);
+    }
+
+    function test_buy_addFinalizedFlag() public {
+        paymentToken.mint(user, ROUND_CAP);
+        vm.prank(user);
+        paymentToken.approve(address(sale), ROUND_CAP);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.prank(user);
+        sale.buy(ROUND_CAP);
+
+        assertTrue(sale.getCurrentSale().finalized);
+        assertEq(sale.getCurrentSale().totalInvestment, ROUND_CAP);
+    }
+
+    function test_buy_addFinalizedFlag_emitSaleFinalized() public {
+        paymentToken.mint(user, ROUND_CAP);
+        vm.prank(user);
+        paymentToken.approve(address(sale), ROUND_CAP);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.expectEmit(true, false, false, false);
+        emit NudixSale.SaleFinalized(sale.getCurrentSaleId());
+
+        vm.prank(user);
+        sale.buy(ROUND_CAP);
+    }
+
+    function test_buy_withDecimals6() public {
+        // 1. Create NudixSale with new paymentToken
+        ERC20Mock paymentTokenWithDec6 = new ERC20Mock(6);
+        NudixSale saleWithDec6 =
+            new NudixSale(address(shareToken), address(paymentTokenWithDec6), wallet, owner);
+        vm.startPrank(owner);
+        shareToken.grantRole(shareToken.MINTER_ROLE(), address(saleWithDec6));
+        vm.stopPrank();
+
+        // 2. Get paymentTokens
+        uint256 userPaymentTokenBalance = 100e6; // for example 100 USDT
+        paymentTokenWithDec6.mint(user, userPaymentTokenBalance);
+
+        vm.prank(user);
+        paymentTokenWithDec6.approve(address(saleWithDec6), userPaymentTokenBalance);
+
+        // 3. Start sale
+        Sale memory saleRound = Sale({
+            startTime: block.timestamp,
+            minPurchase: MIN_PURCHASE, // 1 shareToken
+            roundRate: 0.5e6, // 1 shareToken == 0.5 USDT
+            roundCap: 100_000e6, // 100 000 USDT
+            totalInvestment: 0,
+            finalized: false
+        });
+
+        vm.prank(owner);
+        saleWithDec6.startSale(saleRound);
+
+        // 4. Buy tokens
+        uint256 buyAmount = 100e18; // 100 shareToken
+
+        // 100e18 * 0.5e6 = 50e6 | 100 shareToken * 0.5 USDT = 50 USDT
+        uint256 expectedPrice = buyAmount * saleRound.roundRate / 1e18;
+
+        vm.prank(user);
+        saleWithDec6.buy(buyAmount);
+
+        uint256 actualPrice = saleWithDec6.getCurrentPrice(buyAmount);
+
+        assertEq(expectedPrice, actualPrice);
+        assertEq(shareToken.balanceOf(user), buyAmount);
+        assertEq(paymentTokenWithDec6.balanceOf(user), userPaymentTokenBalance - actualPrice);
+        assertEq(paymentTokenWithDec6.balanceOf(wallet), saleWithDec6.getCurrentPrice(buyAmount));
+        assertEq(saleWithDec6.getCurrentSale().totalInvestment, expectedPrice);
+    }
+
+    function test_startSale_emitSold() public {
+        paymentToken.mint(user, VALUE);
+        vm.prank(user);
+        paymentToken.approve(address(sale), VALUE);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        vm.expectEmit(true, false, false, true);
+        emit NudixSale.Sold(user, VALUE, sale.getCurrentPrice(VALUE));
+
+        vm.prank(user);
+        sale.buy(VALUE);
+    }
+
+    // endregion
+
+    // region - Getters -
+
+    function test_getCurrentSaleId() public {
+        assertEq(sale.getCurrentSaleId(), 0);
+
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        assertEq(sale.getCurrentSaleId(), 1);
+    }
+
+    function test_getCurrentPrice() public {
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        uint256 amount = 100e18; // 100 shareToken
+        uint256 expectedPrice = amount * sale.getCurrentSale().roundRate / 1e18;
+        assertEq(sale.getCurrentPrice(amount), expectedPrice);
+    }
+
+    function test_getCurrentPrice_withMinRoundRate() public {
+        vm.prank(owner);
+        sale.startSale(
+            Sale({
+                startTime: block.timestamp,
+                minPurchase: MIN_PURCHASE,
+                roundRate: 1,
+                roundCap: ROUND_CAP,
+                totalInvestment: 0,
+                finalized: false
+            })
+        );
+
+        uint256 amount = 100e18;
+        uint256 expectedPrice = amount * sale.getCurrentSale().roundRate / 1e18;
+        assertEq(sale.getCurrentPrice(amount), expectedPrice);
+    }
+
+    function test_getSale() public {
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        Sale memory saleRound = sale.getSale(sale.getCurrentSaleId());
+
+        assertEq(saleRound.startTime, block.timestamp);
+        assertEq(saleRound.minPurchase, MIN_PURCHASE);
+        assertEq(saleRound.roundRate, ROUND_RATE);
+        assertEq(saleRound.roundCap, ROUND_CAP);
+        assertEq(saleRound.totalInvestment, 0);
+        assertEq(saleRound.finalized, false);
+    }
+
+    function test_getCurrentSale() public {
+        vm.prank(owner);
+        sale.startSale(_getDefaultSale());
+
+        Sale memory saleRound = sale.getCurrentSale();
+
+        assertEq(saleRound.startTime, block.timestamp);
+        assertEq(saleRound.minPurchase, MIN_PURCHASE);
+        assertEq(saleRound.roundRate, ROUND_RATE);
+        assertEq(saleRound.roundCap, ROUND_CAP);
+        assertEq(saleRound.totalInvestment, 0);
+        assertEq(saleRound.finalized, false);
+    }
+
+    function test_getWallet() public view {
+        assertEq(sale.getWallet(), wallet);
+    }
+
+    function test_getPaymentToken() public view {
+        assertEq(sale.getPaymentToken(), address(paymentToken));
+    }
+
+    function test_getShareToken() public view {
+        assertEq(sale.getShareToken(), address(shareToken));
+    }
+
+    // endregion
+}
