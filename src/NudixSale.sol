@@ -34,7 +34,6 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     uint256 private constant _TOKEN_SCALE = 1e18;
-    address private constant _ADDRESS_ZERO = address(0);
 
     /// @notice TemporaryNudix token contract
     ITemporaryNudix private immutable _temporaryNudix;
@@ -107,10 +106,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     constructor(address temporaryNudix, address paymentToken, address wallet, address initialOwner)
         Ownable(initialOwner)
     {
-        if (
-            temporaryNudix == _ADDRESS_ZERO || paymentToken == _ADDRESS_ZERO
-                || wallet == _ADDRESS_ZERO
-        ) {
+        if (temporaryNudix == address(0) || paymentToken == address(0) || wallet == address(0)) {
             revert ZeroAddress();
         }
 

@@ -24,9 +24,6 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
     /// @notice Role identifier for accounts allowed to mint tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    /// @dev Constant for zero address
-    address internal constant ADDRESS_ZERO = address(0);
-
     /// @dev Only addresses present here can receive token transfers
     mapping(address account => bool) private _isWhitelisted;
 
@@ -111,10 +108,10 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
 
     /// @dev Internal transfer hook to restrict transfers to whitelisted addresses
     /// Allows minting and burning, but reverts on transfers to non-whitelisted addresses
-    ///     from == ADDRESS_ZERO, to == recipient - mint
-    ///     from == sender, to == ADDRESS_ZERO    - burn
+    ///     from == address(0), to == recipient - mint
+    ///     from == sender, to == address(0)    - burn
     function _update(address from, address to, uint256 value) internal override {
-        if (from == ADDRESS_ZERO || to == ADDRESS_ZERO) {
+        if (from == address(0) || to == address(0)) {
             return super._update(from, to, value);
         }
 
