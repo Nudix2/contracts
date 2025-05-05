@@ -86,7 +86,13 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Emitted when a new sale round is started
-    event SaleStarted(uint8 indexed saleId, Sale sale);
+    event SaleStarted(
+        uint8 indexed saleId,
+        uint256 startTime,
+        uint256 minPurchase,
+        uint256 roundRate,
+        uint256 roundCap
+    );
 
     /// @notice Emitted when the current sale is finalized manually or via cap
     event SaleFinalized(uint8 indexed saleId);
@@ -164,33 +170,40 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     // region - Sale admin functions -
 
     /**
-     * @notice Starts a new sale round
-     * @param sale Struct with sale configuration
+     * @notice Starts a new token sale round with specified parameters
+     * @param startTime Unix timestamp when sale becomes active (in seconds)
+     * @param minPurchase Minimum amount of tokens user can buy (in TemporaryNudix units)
+     * @param roundRate Exchange rate for the round in paymentToken
+     * @param roundCap Maximum total investment in paymentToken
      * @dev Only callable by the contract owner
      */
-    function startSale(Sale calldata sale) external onlyOwner {
+    function startSale(
+        uint256 startTime, 
+        uint256 minPurchase, 
+        uint256 roundRate, 
+        uint256 roundCap
+    ) external onlyOwner {
         uint8 currentSaleId = getCurrentSaleId();
         if (currentSaleId != 0 && !_sales[currentSaleId].finalized) {
             revert CurrentSaleMustNotBeActive();
         }
 
-        if (sale.startTime < block.timestamp) {
+        if (startTime < block.timestamp) {
             revert IncorrectStartTime();
         }
 
-        if (sale.roundRate == 0 || sale.roundCap == 0) {
+        if (roundRate == 0 || roundCap == 0) {
             revert ZeroParam();
         }
 
-        if (sale.minPurchase < _TOKEN_SCALE) {
-            revert BelowMinPurchase(_TOKEN_SCALE, sale.minPurchase);
+        if (minPurchase < _TOKEN_SCALE) {
+            revert BelowMinPurchase(_TOKEN_SCALE, minPurchase);
         }
 
         _saleId += 1;
-        _sales[_saleId] =
-            Sale(sale.startTime, sale.minPurchase, sale.roundRate, sale.roundCap, 0, false);
+        _sales[_saleId] = Sale(startTime, minPurchase, roundRate, roundCap, 0, false);
 
-        emit SaleStarted(_saleId, sale);
+        emit SaleStarted(_saleId, startTime, minPurchase, roundRate, roundCap);
     }
 
     /**
