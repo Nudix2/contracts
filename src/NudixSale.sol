@@ -138,10 +138,10 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
             revert BelowMinPurchase(currentSale.minPurchase, amount);
         }
 
-        uint256 price = getCurrentPrice(amount);
-        assert(price > 0);
+        uint256 paymentAmount = getCurrentPrice(amount);
+        assert(paymentAmount > 0);
 
-        uint256 currentTotalInvestment = currentSale.totalInvestment + price;
+        uint256 currentTotalInvestment = currentSale.totalInvestment + paymentAmount;
         if (currentTotalInvestment > currentSale.roundCap) {
             revert MaxCapReached();
         }
@@ -151,12 +151,12 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
             emit SaleFinalized(currentSaleId);
         }
 
-        _sales[currentSaleId].totalInvestment += price;
+        _sales[currentSaleId].totalInvestment += paymentAmount;
 
-        _paymentToken.safeTransferFrom(msg.sender, _wallet, price);
+        _paymentToken.safeTransferFrom(msg.sender, _wallet, paymentAmount);
         _temporaryNudix.mint(msg.sender, amount);
 
-        emit Sold(msg.sender, amount, price);
+        emit Sold(msg.sender, amount, paymentAmount);
     }
 
     // endregion
