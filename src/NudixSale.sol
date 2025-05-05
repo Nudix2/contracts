@@ -5,7 +5,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {TemporaryNudix} from "src/TemporaryNudix.sol";
+import {ITemporaryNudix} from "src/TemporaryNudix.sol";
 
 /**
  * @notice Sale round configuration
@@ -37,7 +37,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     address private constant _ADDRESS_ZERO = address(0);
 
     /// @notice TemporaryNudix token contract
-    TemporaryNudix private immutable _temporaryNudix;
+    ITemporaryNudix private immutable _temporaryNudix;
 
     /// @notice ERC20 token used as a payment medium (e.g., USDT, USDC)
     IERC20 private immutable _paymentToken;
@@ -114,7 +114,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
             revert ZeroAddress();
         }
 
-        _temporaryNudix = TemporaryNudix(temporaryNudix);
+        _temporaryNudix = ITemporaryNudix(temporaryNudix);
         _paymentToken = IERC20(paymentToken);
         _wallet = wallet;
     }

@@ -5,6 +5,8 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
+import {ITemporaryNudix} from "src/interfaces/ITemporaryNudix.sol";
+
 /**
  * @title Temporary Nudix Token (share token)
  * @notice ERC20-compatible token with burn, permit (EIP-2612), minting
@@ -18,7 +20,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  *     - Can mint new tokens to whitelisted addresses
  *     - Can perform batch minting operations
  */
-contract TemporaryNudix is ERC20Permit, ERC20Burnable, AccessControl {
+contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessControl {
     /// @notice Role identifier for accounts allowed to mint tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -27,32 +29,6 @@ contract TemporaryNudix is ERC20Permit, ERC20Burnable, AccessControl {
 
     /// @dev Only addresses present here can receive token transfers
     mapping(address account => bool) private _isWhitelisted;
-
-    /*//////////////////////////////////////////////////////////////
-                                 ERRORS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Thrown when the recipients and amounts array lengths do not match
-    error ArrayLengthMismatch();
-
-    /// @notice Thrown when trying to add an already-whitelisted address
-    error AlreadyWhitelisted(address account);
-
-    /// @notice Thrown when trying to remove a non-whitelisted address
-    error NotWhitelisted(address account);
-
-    /// @notice Thrown when a transfer is attempted to an address not in the whitelist
-    error TransferProhibited(address to);
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Emitted when an address is removed from the whitelist
-    event Unwhitelisted(address indexed account);
-
-    /// @notice Emitted when an address is added to the whitelist
-    event Whitelisted(address indexed account);
 
     constructor(address admin) ERC20("Temporary Nudix", "T-NUDIX") ERC20Permit("TemporaryNudix") {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);

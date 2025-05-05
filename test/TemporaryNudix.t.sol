@@ -7,7 +7,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
-import {TemporaryNudix} from "src/TemporaryNudix.sol";
+import {ITemporaryNudix, TemporaryNudix} from "src/TemporaryNudix.sol";
 
 contract TemporaryNudixTest is Test {
     TemporaryNudix token;
@@ -101,7 +101,7 @@ contract TemporaryNudixTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = VALUE;
 
-        vm.expectRevert(TemporaryNudix.ArrayLengthMismatch.selector);
+        vm.expectRevert(ITemporaryNudix.ArrayLengthMismatch.selector);
 
         vm.prank(minter);
         token.mintBatch(recipients, amounts);
@@ -134,7 +134,7 @@ contract TemporaryNudixTest is Test {
         vm.prank(admin);
         token.addToWhitelist(user);
 
-        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.AlreadyWhitelisted.selector, user));
+        vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.AlreadyWhitelisted.selector, user));
 
         vm.prank(admin);
         token.addToWhitelist(user);
@@ -155,7 +155,7 @@ contract TemporaryNudixTest is Test {
 
     function test_addToWhitelist_emitWhitelisted() public {
         vm.expectEmit(true, false, false, false);
-        emit TemporaryNudix.Whitelisted(user);
+        emit ITemporaryNudix.Whitelisted(user);
 
         vm.prank(admin);
         token.addToWhitelist(user);
@@ -175,7 +175,7 @@ contract TemporaryNudixTest is Test {
     //      region - removeFromWhitelist
 
     function test_removeFromWhitelist_revertIfNotWhitelisted() public {
-        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.NotWhitelisted.selector, user));
+        vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.NotWhitelisted.selector, user));
 
         vm.prank(admin);
         token.removeFromWhitelist(user);
@@ -199,7 +199,7 @@ contract TemporaryNudixTest is Test {
         token.addToWhitelist(user);
 
         vm.expectEmit(true, false, false, false);
-        emit TemporaryNudix.Unwhitelisted(user);
+        emit ITemporaryNudix.Unwhitelisted(user);
 
         vm.prank(admin);
         token.removeFromWhitelist(user);
@@ -239,7 +239,7 @@ contract TemporaryNudixTest is Test {
         vm.prank(minter);
         token.mint(user, VALUE);
 
-        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.TransferProhibited.selector, user2));
+        vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, user2));
 
         vm.prank(user);
         token.transfer(user2, VALUE);
