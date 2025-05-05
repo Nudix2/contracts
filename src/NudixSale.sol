@@ -33,13 +33,14 @@ struct Sale {
 contract NudixSale is Ownable, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
-    uint256 private constant _TOKEN_SCALE = 1e18;
-
     /// @notice TemporaryNudix token contract
     ITemporaryNudix private immutable _temporaryNudix;
 
     /// @notice ERC20 token used as a payment medium (e.g., USDT, USDC)
     IERC20 private immutable _paymentToken;
+
+    /// @notice Token scale is equal to 1 share token
+    uint256 private immutable _tokenScale;
 
     /// @notice Address receiving the collected funds
     address private immutable _wallet;
@@ -117,6 +118,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
         }
 
         _temporaryNudix = ITemporaryNudix(temporaryNudix);
+        _tokenScale = 10 ** _temporaryNudix.decimals();
         _paymentToken = IERC20(paymentToken);
         _wallet = wallet;
     }
@@ -196,8 +198,8 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
             revert ZeroParam();
         }
 
-        if (minPurchase < _TOKEN_SCALE) {
-            revert BelowMinPurchase(_TOKEN_SCALE, minPurchase);
+        if (minPurchase < _tokenScale) {
+            revert BelowMinPurchase(_tokenScale, minPurchase);
         }
 
         _saleId += 1;
@@ -234,7 +236,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
      * @return Price in paymentToken
      */
     function getCurrentPrice(uint256 amount) public view returns (uint256) {
-        return (amount * _sales[_saleId].roundRate) / _TOKEN_SCALE;
+        return (amount * _sales[_saleId].roundRate) / _tokenScale;
     }
 
     /**

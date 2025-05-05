@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-interface ITemporaryNudix {
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+interface ITemporaryNudix is IERC20Metadata {
     /// @notice Thrown when the recipients and amounts array lengths do not match
     error ArrayLengthMismatch();
 
