@@ -7,10 +7,10 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
-import {NudixShare} from "src/NudixShare.sol";
+import {TemporaryNudix} from "src/TemporaryNudix.sol";
 
-contract NudixShareTest is Test {
-    NudixShare token;
+contract TemporaryNudixTest is Test {
+    TemporaryNudix token;
 
     uint256 constant VALUE = 100e18;
 
@@ -29,7 +29,7 @@ contract NudixShareTest is Test {
         (user, userPrivateKey) = makeAddrAndKey("user");
 
         // Deploy the token contract
-        token = new NudixShare(admin);
+        token = new TemporaryNudix(admin);
 
         vm.startPrank(admin);
         token.grantRole(token.MINTER_ROLE(), minter);
@@ -42,8 +42,8 @@ contract NudixShareTest is Test {
         assertEq(token.hasRole(token.DEFAULT_ADMIN_ROLE(), admin), true);
         assertEq(token.hasRole(token.MINTER_ROLE(), minter), true);
 
-        assertEq(token.name(), "Nudix Share");
-        assertEq(token.symbol(), "NUDIX-S");
+        assertEq(token.name(), "Temporary Nudix");
+        assertEq(token.symbol(), "T-NUDIX");
         assertEq(token.decimals(), 18);
         assertEq(token.totalSupply(), 0);
     }
@@ -101,7 +101,7 @@ contract NudixShareTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = VALUE;
 
-        vm.expectRevert(NudixShare.ArrayLengthMismatch.selector);
+        vm.expectRevert(TemporaryNudix.ArrayLengthMismatch.selector);
 
         vm.prank(minter);
         token.mintBatch(recipients, amounts);
@@ -134,7 +134,7 @@ contract NudixShareTest is Test {
         vm.prank(admin);
         token.addToWhitelist(user);
 
-        vm.expectRevert(abi.encodeWithSelector(NudixShare.AlreadyWhitelisted.selector, user));
+        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.AlreadyWhitelisted.selector, user));
 
         vm.prank(admin);
         token.addToWhitelist(user);
@@ -155,7 +155,7 @@ contract NudixShareTest is Test {
 
     function test_addToWhitelist_emitWhitelisted() public {
         vm.expectEmit(true, false, false, false);
-        emit NudixShare.Whitelisted(user);
+        emit TemporaryNudix.Whitelisted(user);
 
         vm.prank(admin);
         token.addToWhitelist(user);
@@ -175,7 +175,7 @@ contract NudixShareTest is Test {
     //      region - removeFromWhitelist
 
     function test_removeFromWhitelist_revertIfNotWhitelisted() public {
-        vm.expectRevert(abi.encodeWithSelector(NudixShare.NotWhitelisted.selector, user));
+        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.NotWhitelisted.selector, user));
 
         vm.prank(admin);
         token.removeFromWhitelist(user);
@@ -199,7 +199,7 @@ contract NudixShareTest is Test {
         token.addToWhitelist(user);
 
         vm.expectEmit(true, false, false, false);
-        emit NudixShare.Unwhitelisted(user);
+        emit TemporaryNudix.Unwhitelisted(user);
 
         vm.prank(admin);
         token.removeFromWhitelist(user);
@@ -239,7 +239,7 @@ contract NudixShareTest is Test {
         vm.prank(minter);
         token.mint(user, VALUE);
 
-        vm.expectRevert(abi.encodeWithSelector(NudixShare.TransferProhibited.selector, user2));
+        vm.expectRevert(abi.encodeWithSelector(TemporaryNudix.TransferProhibited.selector, user2));
 
         vm.prank(user);
         token.transfer(user2, VALUE);
@@ -379,7 +379,7 @@ contract NudixShareTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 ERC20Permit.ERC2612InvalidSigner.selector,
-                0xA1B61083dc8ccF95FfFc381243E93a39FA49e58f,
+                0x7ec59B7f4C21AebCF9acBcCaaEC9c8036b352458,
                 user
             )
         );

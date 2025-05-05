@@ -6,7 +6,7 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
- * @title Nudix Share Token
+ * @title Temporary Nudix Token (share token)
  * @notice ERC20-compatible token with burn, permit (EIP-2612), minting
  * and transfer restrictions based on a whitelist
  * Roles:
@@ -18,7 +18,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  *     - Can mint new tokens to whitelisted addresses
  *     - Can perform batch minting operations
  */
-contract NudixShare is ERC20Permit, ERC20Burnable, AccessControl {
+contract TemporaryNudix is ERC20Permit, ERC20Burnable, AccessControl {
     /// @notice Role identifier for accounts allowed to mint tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -54,10 +54,7 @@ contract NudixShare is ERC20Permit, ERC20Burnable, AccessControl {
     /// @notice Emitted when an address is added to the whitelist
     event Whitelisted(address indexed account);
 
-    constructor(address admin)
-        ERC20("Nudix Share", "NUDIX-S")
-        ERC20Permit("NudixShare")
-    {
+    constructor(address admin) ERC20("Temporary Nudix", "T-NUDIX") ERC20Permit("TemporaryNudix") {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 

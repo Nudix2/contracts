@@ -7,11 +7,11 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
 import {NudixSale, Sale} from "src/NudixSale.sol";
-import {NudixShare} from "src/NudixShare.sol";
+import {TemporaryNudix} from "src/TemporaryNudix.sol";
 
 contract NudixSaleTest is Test {
     ERC20Mock paymentToken;
-    NudixShare shareToken;
+    TemporaryNudix shareToken;
     NudixSale sale;
 
     uint256 constant VALUE = 100e18;
@@ -30,7 +30,7 @@ contract NudixSaleTest is Test {
         hacker = makeAddr("hacker");
         user = makeAddr("user");
 
-        shareToken = new NudixShare(owner);
+        shareToken = new TemporaryNudix(owner);
         paymentToken = new ERC20Mock(18);
 
         sale = new NudixSale(address(shareToken), address(paymentToken), wallet, owner);

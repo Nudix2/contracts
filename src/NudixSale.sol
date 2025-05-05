@@ -5,12 +5,12 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {NudixShare} from "src/NudixShare.sol";
+import {TemporaryNudix} from "src/TemporaryNudix.sol";
 
 /**
  * @notice Sale round configuration
  * @param startTime Unix timestamp when sale becomes active (in seconds)
- * @param minPurchase Minimum amount of tokens user can buy (in NudixShare units)
+ * @param minPurchase Minimum amount of tokens user can buy (in TemporaryNudix units)
  * @param roundRate Exchange rate for the round in paymentToken
  * @param roundCap Maximum total investment in paymentToken
  * @param totalInvestment Total collected funds in current round (in paymentToken)
@@ -27,7 +27,7 @@ struct Sale {
 
 /**
  * @title NudixSale
- * @notice Smart contract to manage token sale rounds for NudixShare tokens.
+ * @notice Smart contract to manage token sale rounds for TemporaryNudix tokens.
  * @dev Each sale round has its own configuration including startTime, rate, cap, and minimum purchase.
  */
 contract NudixSale is Ownable, ReentrancyGuardTransient {
@@ -36,8 +36,8 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     uint256 private constant _TOKEN_SCALE = 1e18;
     address private constant _ADDRESS_ZERO = address(0);
 
-    /// @notice NudixShare token contract
-    NudixShare private immutable _nudixShare;
+    /// @notice TemporaryNudix token contract
+    TemporaryNudix private immutable _temporaryNudix;
 
     /// @notice ERC20 token used as a payment medium (e.g., USDT, USDC)
     IERC20 private immutable _paymentToken;
@@ -104,15 +104,17 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
         _;
     }
 
-    constructor(address nudixShare, address paymentToken, address wallet, address initialOwner)
+    constructor(address temporaryNudix, address paymentToken, address wallet, address initialOwner)
         Ownable(initialOwner)
     {
-        if (nudixShare == _ADDRESS_ZERO || paymentToken == _ADDRESS_ZERO || wallet == _ADDRESS_ZERO)
-        {
+        if (
+            temporaryNudix == _ADDRESS_ZERO || paymentToken == _ADDRESS_ZERO
+                || wallet == _ADDRESS_ZERO
+        ) {
             revert ZeroAddress();
         }
 
-        _nudixShare = NudixShare(nudixShare);
+        _temporaryNudix = TemporaryNudix(temporaryNudix);
         _paymentToken = IERC20(paymentToken);
         _wallet = wallet;
     }
@@ -120,9 +122,9 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     // region - Buy -
 
     /**
-     * @notice Buy NudixShare tokens in the active sale round
-     * @param amount Amount of tokens (in NudixShare units) to purchase
-     * @dev Transfers paymentToken from sender to wallet and mints NudixShare tokens
+     * @notice Buy TemporaryNudix tokens in the active sale round
+     * @param amount Amount of tokens (in TemporaryNudix units) to purchase
+     * @dev Transfers paymentToken from sender to wallet and mints TemporaryNudix tokens
      */
     function buy(uint256 amount) external whenNotFinalized nonReentrant {
         uint8 currentSaleId = getCurrentSaleId();
@@ -156,7 +158,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
         _sales[currentSaleId].totalInvestment += price;
 
         _paymentToken.safeTransferFrom(msg.sender, _wallet, price);
-        _nudixShare.mint(msg.sender, amount);
+        _temporaryNudix.mint(msg.sender, amount);
 
         emit Sold(msg.sender, amount, price);
     }
@@ -219,7 +221,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
 
     /**
      * @notice Calculates price in paymentToken for given token amount
-     * @param amount Token amount in NudixShare units
+     * @param amount Token amount in TemporaryNudix units
      * @return Price in paymentToken
      */
     function getCurrentPrice(uint256 amount) public view returns (uint256) {
@@ -260,11 +262,11 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     }
 
     /**
-     * @notice Returns address of the NudixShare token
-     * @return NudixShare contract address
+     * @notice Returns address of the TemporaryNudix token
+     * @return TemporaryNudix contract address
      */
     function getShareToken() external view returns (address) {
-        return address(_nudixShare);
+        return address(_temporaryNudix);
     }
 
     // endregion

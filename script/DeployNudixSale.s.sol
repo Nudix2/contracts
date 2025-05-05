@@ -8,14 +8,14 @@ import {NudixSale} from "src/NudixSale.sol";
 contract DeployNudixSale is Script {
     NudixSale nudixSale;
 
-    function run(address nudixShare, address paymentToken, address wallet, address initialOwner)
+    function run(address temporaryNudix, address paymentToken, address wallet, address initialOwner)
         public
     {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
 
-        nudixSale = new NudixSale(nudixShare, paymentToken, wallet, initialOwner);
+        nudixSale = new NudixSale(temporaryNudix, paymentToken, wallet, initialOwner);
 
         vm.stopBroadcast();
 
