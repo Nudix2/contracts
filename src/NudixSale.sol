@@ -55,7 +55,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Thrown when the purchase amount is below required minimum
-    error BelowMinPurchase(uint256 requiredMinimum);
+    error BelowMinPurchase(uint256 requiredMinimum, uint256 actualAmount);
 
     /// @notice Thrown when trying to start a new sale while current one is still active
     error CurrentSaleMustNotBeActive();
@@ -135,7 +135,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
         }
 
         if (amount < currentSale.minPurchase) {
-            revert BelowMinPurchase(currentSale.minPurchase);
+            revert BelowMinPurchase(currentSale.minPurchase, amount);
         }
 
         uint256 price = getCurrentPrice(amount);
@@ -183,7 +183,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
         }
 
         if (sale.minPurchase < _TOKEN_SCALE) {
-            revert BelowMinPurchase(_TOKEN_SCALE);
+            revert BelowMinPurchase(_TOKEN_SCALE, sale.minPurchase);
         }
 
         _saleId += 1;
