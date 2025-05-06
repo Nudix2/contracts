@@ -154,7 +154,7 @@ contract TemporaryNudixTest is Test {
     }
 
     function test_addToWhitelist_emitWhitelisted() public {
-        vm.expectEmit(true, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit ITemporaryNudix.Whitelisted(user);
 
         vm.prank(admin);
@@ -198,7 +198,7 @@ contract TemporaryNudixTest is Test {
         vm.prank(admin);
         token.addToWhitelist(user);
 
-        vm.expectEmit(true, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit ITemporaryNudix.Unwhitelisted(user);
 
         vm.prank(admin);

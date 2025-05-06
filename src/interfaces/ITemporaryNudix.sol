@@ -17,10 +17,10 @@ interface ITemporaryNudix is IERC20Metadata {
     error TransferProhibited(address to);
 
     /// @notice Emitted when an address is removed from the whitelist
-    event Unwhitelisted(address indexed account);
+    event Unwhitelisted(address account);
 
     /// @notice Emitted when an address is added to the whitelist
-    event Whitelisted(address indexed account);
+    event Whitelisted(address account);
 
     function mint(address recipient, uint256 amount) external;
     function mintBatch(address[] calldata recipients, uint256[] calldata amounts) external;
