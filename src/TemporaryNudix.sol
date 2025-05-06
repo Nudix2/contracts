@@ -8,9 +8,13 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ITemporaryNudix} from "src/interfaces/ITemporaryNudix.sol";
 
 /**
- * @title Temporary Nudix Token (share token)
- * @notice ERC20-compatible token with burn, permit (EIP-2612), minting
- * and transfer restrictions based on a whitelist
+ * @title Temporary Nudix Token (T-NUDIX)
+ * @notice ERC20-compatible share token (temporary wrapper for Nudix) with the following features:
+ * - Minting and batch minting
+ * - Burning (used in the future to exchange for the main Nudix token)
+ * - EIP-2612 Permit support
+ * - Transfer restrictions: only whitelisted addresses can receive tokens
+ *
  * Roles:
  * - DEFAULT_ADMIN_ROLE:
  *     - Can add or remove addresses from the whitelist
