@@ -246,6 +246,29 @@ contract NudixSaleTest is Test {
         sale.buy(reachedAmount);
     }
 
+    /// @dev roundRate calculation context:
+    ///
+    /// Note: USDT may have either 6 or 18 decimals depending on the network
+    ///       (e.g., 6 decimals on Ethereum mainnet, but 18 on BNB Chain)
+    ///
+    /// For this example, assume USDT has 6 decimals,
+    /// and Nudix has 18 decimals (standard)
+    /// TOKEN_SCALE is set to 1e18 to normalize rates to 18 decimals
+    ///
+    /// Goal: establish a 1:1 exchange rate (1 USDT → 1 Nudix)
+    ///
+    /// Formula used in contract: (amount * roundRate) / TOKEN_SCALE
+    ///
+    /// We want to receive 1e18 Nudix tokens
+    /// How much USDT should be spent? → 1e6 (i.e. 1 USDT in 6-decimal format)
+    ///
+    /// Plug into the formula:
+    /// (1e18 * roundRate) / 1e18 = 1e6
+    /// → roundRate = 1e6
+    ///
+    /// Therefore:
+    /// - If USDT has 6 decimals, use roundRate = 1e6 for a 1:1 exchange
+    /// - If USDT has 18 decimals, use roundRate = 1e18
     function test_buy_success(uint256 amount) public {
         amount = bound(amount, MIN_PURCHASE, ROUND_CAP);
 
