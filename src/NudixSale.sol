@@ -234,6 +234,7 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
      * @notice Calculates price in paymentToken for given token amount
      * @param amount Token amount in TemporaryNudix units
      * @return Price in paymentToken
+     * @dev The calculation is performed taking into account the TemporaryNudix decimals
      */
     function getCurrentPrice(uint256 amount) public view returns (uint256) {
         return (amount * _sales[_saleId].roundRate) / _tokenScale;
