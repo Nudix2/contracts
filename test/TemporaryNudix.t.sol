@@ -231,6 +231,80 @@ contract TemporaryNudixTest is Test {
         assertFalse(token.isWhitelisted(user));
     }
 
+    function test_isWhitelisted_success_burn() public {
+        address whitelistedAddress = makeAddr("whitelistedAddress");
+
+        vm.prank(minter);
+        token.mint(whitelistedAddress, VALUE);
+
+        assertFalse(token.isWhitelisted(whitelistedAddress));
+
+        vm.prank(admin);
+        token.addToWhitelist(whitelistedAddress);
+
+        assertTrue(token.isWhitelisted(whitelistedAddress));
+        assertEq(token.balanceOf(whitelistedAddress), VALUE);
+
+        vm.prank(whitelistedAddress);
+        token.burn(VALUE);
+
+        assertEq(token.balanceOf(whitelistedAddress), 0);
+    }
+
+    function test_isWhitelisted_success_burnFrom() public {
+        address anotherUser = makeAddr("anotherUser");
+
+        vm.prank(minter);
+        token.mint(user, VALUE);
+
+        vm.prank(user);
+        token.approve(anotherUser, VALUE);
+        assertEq(token.allowance(user, anotherUser), VALUE);
+
+        vm.prank(admin);
+        token.addToWhitelist(user);
+        assertTrue(token.isWhitelisted(user));
+        assertFalse(token.isWhitelisted(anotherUser));
+
+        vm.prank(anotherUser);
+        token.burnFrom(user, VALUE);
+
+        assertEq(token.balanceOf(user), 0);
+    }
+
+    function test_isWhitelisted_revertIfBurnFromWithoutWhitelist() public {
+        address anotherUser = makeAddr("anotherUser");
+
+        vm.prank(minter);
+        token.mint(user, VALUE);
+
+        vm.prank(user);
+        token.approve(anotherUser, VALUE);
+        assertEq(token.allowance(user, anotherUser), VALUE);
+
+        assertFalse(token.isWhitelisted(user));
+        assertFalse(token.isWhitelisted(anotherUser));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0))
+        );
+
+        vm.prank(anotherUser);
+        token.burnFrom(user, VALUE);
+    }
+
+    function test_update_revertIfBurnByUser() public {
+        vm.prank(minter);
+        token.mint(user, VALUE);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0))
+        );
+
+        vm.prank(user);
+        token.burn(VALUE);
+    }
+
     // endregion
 
     //      region - update
@@ -264,16 +338,6 @@ contract TemporaryNudixTest is Test {
         token.mint(user, VALUE);
 
         assertEq(token.balanceOf(user), VALUE);
-    }
-
-    function test_update_successIfBurn() public {
-        vm.prank(minter);
-        token.mint(user, VALUE);
-
-        vm.prank(user);
-        token.burn(VALUE);
-
-        assertEq(token.balanceOf(user), 0);
     }
 
     // endregion

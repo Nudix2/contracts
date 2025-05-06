@@ -110,12 +110,15 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
         return _isWhitelisted[account];
     }
 
-    /// @dev Internal transfer hook to restrict transfers to whitelisted addresses
-    /// Allows minting and burning, but reverts on transfers to non-whitelisted addresses
-    ///     from == address(0), to == recipient - mint
-    ///     from == sender, to == address(0)    - burn
+    /// @dev Internal transfer hook that enforces whitelist rules:
+    ///     - Minting (from == address(0)) is always allowed
+    ///     - Burning (to == address(0)) is allowed only if sender (`from`) is whitelisted
+    ///     - Transfers between accounts require recipient (`to`) to be whitelisted
     function _update(address from, address to, uint256 value) internal override {
-        if (from == address(0) || to == address(0)) {
+        bool isMint = from == address(0);
+        bool isBurn = to == address(0) && _isWhitelisted[from];
+
+        if (isMint || isBurn) {
             return super._update(from, to, value);
         }
 
