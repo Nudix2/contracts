@@ -79,7 +79,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
             revert BelowMinPurchase(currentSale.minPurchase, amount);
         }
 
-        uint256 paymentAmount = getCurrentPrice(amount);
+        uint256 paymentAmount = getPaymentAmount(amount);
         assert(paymentAmount > 0);
 
         uint256 currentTotalInvestment = currentSale.totalInvestment + paymentAmount;
@@ -166,10 +166,10 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
     /**
      * @notice Calculates price in paymentToken for given token amount
      * @param amount Token amount in TemporaryNudix units
-     * @return Price in paymentToken
+     * @return Payment token amount
      * @dev The calculation is performed taking into account the TemporaryNudix decimals
      */
-    function getCurrentPrice(uint256 amount) public view returns (uint256) {
+    function getPaymentAmount(uint256 amount) public view returns (uint256) {
         return (amount * _sales[_saleId].roundRate) / _tokenScale;
     }
 

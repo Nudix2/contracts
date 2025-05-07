@@ -66,7 +66,7 @@ interface INudixSale {
     function startSale(uint256 startTime, uint256 minPurchase, uint256 roundRate, uint256 roundCap) external;
     function stopSale() external;
     function getCurrentSaleId() external view returns (uint8);
-    function getCurrentPrice(uint256 amount) external view returns (uint256);
+    function getPaymentAmount(uint256 amount) external view returns (uint256);
     function getCurrentSale() external view returns (Sale memory);
     function getSale(uint8 saleId) external view returns (Sale memory);
     function getWallet() external view returns (address);

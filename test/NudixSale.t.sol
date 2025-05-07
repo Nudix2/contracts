@@ -285,7 +285,7 @@ contract NudixSaleTest is Test {
 
         assertEq(shareToken.balanceOf(user), amount);
         assertEq(paymentToken.balanceOf(user), 0);
-        assertEq(paymentToken.balanceOf(wallet), sale.getCurrentPrice(amount));
+        assertEq(paymentToken.balanceOf(wallet), sale.getPaymentAmount(amount));
         assertEq(sale.getCurrentSale().totalInvestment, amount);
     }
 
@@ -350,12 +350,12 @@ contract NudixSaleTest is Test {
         vm.prank(user);
         saleWithDec6.buy(buyAmount);
 
-        uint256 actualPrice = saleWithDec6.getCurrentPrice(buyAmount);
+        uint256 actualPrice = saleWithDec6.getPaymentAmount(buyAmount);
 
         assertEq(expectedPrice, actualPrice);
         assertEq(shareToken.balanceOf(user), buyAmount);
         assertEq(paymentTokenWithDec6.balanceOf(user), userPaymentTokenBalance - actualPrice);
-        assertEq(paymentTokenWithDec6.balanceOf(wallet), saleWithDec6.getCurrentPrice(buyAmount));
+        assertEq(paymentTokenWithDec6.balanceOf(wallet), saleWithDec6.getPaymentAmount(buyAmount));
         assertEq(saleWithDec6.getCurrentSale().totalInvestment, expectedPrice);
     }
 
@@ -368,7 +368,7 @@ contract NudixSaleTest is Test {
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.expectEmit(true, false, false, true);
-        emit INudixSale.Sold(user, VALUE, sale.getCurrentPrice(VALUE));
+        emit INudixSale.Sold(user, VALUE, sale.getPaymentAmount(VALUE));
 
         vm.prank(user);
         sale.buy(VALUE);
@@ -387,22 +387,22 @@ contract NudixSaleTest is Test {
         assertEq(sale.getCurrentSaleId(), 1);
     }
 
-    function test_getCurrentPrice() public {
+    function test_getPaymentAmount() public {
         vm.prank(owner);
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         uint256 amount = 100e18; // 100 shareToken
         uint256 expectedPrice = amount * sale.getCurrentSale().roundRate / 1e18;
-        assertEq(sale.getCurrentPrice(amount), expectedPrice);
+        assertEq(sale.getPaymentAmount(amount), expectedPrice);
     }
 
-    function test_getCurrentPrice_withMinRoundRate() public {
+    function test_getPaymentAmount_withMinRoundRate() public {
         vm.prank(owner);
         sale.startSale(block.timestamp, MIN_PURCHASE, 1, ROUND_CAP);
 
         uint256 amount = 100e18;
         uint256 expectedPrice = amount * sale.getCurrentSale().roundRate / 1e18;
-        assertEq(sale.getCurrentPrice(amount), expectedPrice);
+        assertEq(sale.getPaymentAmount(amount), expectedPrice);
     }
 
     function test_getSale() public {
