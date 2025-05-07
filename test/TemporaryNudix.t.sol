@@ -7,7 +7,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
-import {ITemporaryNudix, TemporaryNudix} from "src/TemporaryNudix.sol";
+import {ITemporaryNudix, TemporaryNudix, MintBatchData} from "src/TemporaryNudix.sol";
 
 contract TemporaryNudixTest is Test {
     TemporaryNudix token;
@@ -78,8 +78,11 @@ contract TemporaryNudixTest is Test {
     // region - MintBatch -
 
     function test_mintBatch_revertIfNotMinterRole() public {
-        address[] memory recipients = new address[](0);
-        uint256[] memory amounts = new uint256[](0);
+        MintBatchData[] memory data = new MintBatchData[](1);
+        data[0] = MintBatchData({
+            recipient: address(0),
+            amount: 0
+        });
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -90,45 +93,67 @@ contract TemporaryNudixTest is Test {
         );
 
         vm.prank(hacker);
-        token.mintBatch(recipients, amounts);
+        token.mintBatch(data);
     }
 
-    function test_mintBatch_revertIfArrayLengthMismatch() public {
-        address[] memory recipients = new address[](2);
-        recipients[0] = user;
-        recipients[1] = user2;
+    function test_mintBatch_revertIfBatchSizeIsExceed(uint256 size) public {
+        size = bound(size, token.MAX_BATCH_SIZE() + 1, token.MAX_BATCH_SIZE() * 10);
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = VALUE;
+        MintBatchData[] memory data = new MintBatchData[](size);
 
-        vm.expectRevert(ITemporaryNudix.ArrayLengthMismatch.selector);
+        for (uint256 i = 0; i < size; i++) {
+            data[i] = MintBatchData({
+                recipient: address(0),
+                amount: 0
+            });
+        }
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITemporaryNudix.BatchSizeExceeded.selector,
+                size,
+                token.MAX_BATCH_SIZE()
+            )
+        );
 
         vm.prank(minter);
-        token.mintBatch(recipients, amounts);
+        token.mintBatch(data);
     }
 
-    function test_mintBatch_success() public {
-        address[] memory recipients = new address[](2);
-        recipients[0] = user;
-        recipients[1] = user2;
+    function test_mintBatch_success(uint256 size) public {
+        size = bound(size, 0, token.MAX_BATCH_SIZE());
 
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = VALUE;
-        amounts[1] = VALUE * 2;
+        MintBatchData[] memory data = new MintBatchData[](size);
+
+        for (uint256 i = 0; i < size; i++) {
+            uint256 positiveIndex = i + 1;
+
+            data[i] = MintBatchData({
+                recipient: address(uint160(positiveIndex)),
+                amount: positiveIndex * 10 ** token.decimals()
+            });
+        }
 
         vm.prank(minter);
-        token.mintBatch(recipients, amounts);
+        token.mintBatch(data);
 
-        assertEq(token.balanceOf(user), VALUE);
-        assertEq(token.balanceOf(user2), VALUE * 2);
-        assertEq(token.totalSupply(), VALUE * 3);
+        uint256 expectedTotalSupply;
+        for (uint256 i = 0; i < size; i++) {
+            uint256 positiveIndex = i + 1;
+            uint256 mintedAmount = positiveIndex * 10 ** token.decimals();
+
+            assertEq(token.balanceOf(address(uint160(positiveIndex))), mintedAmount);
+            expectedTotalSupply += mintedAmount;
+        }
+
+        assertEq(token.totalSupply(), expectedTotalSupply);
     }
 
     // endregion
 
     // region - Whitelist logic -
 
-    //      region - addToWhitelist
+    // region - addToWhitelist
 
     function test_addToWhitelist_revertIfAlreadyWhitelisted() public {
         vm.prank(admin);
@@ -172,7 +197,7 @@ contract TemporaryNudixTest is Test {
 
     // endregion
 
-    //      region - removeFromWhitelist
+    // region - removeFromWhitelist
 
     function test_removeFromWhitelist_revertIfNotWhitelisted() public {
         vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.NotWhitelisted.selector, user));
@@ -217,7 +242,7 @@ contract TemporaryNudixTest is Test {
 
     // endregion
 
-    //      region - isWhitelisted
+    // region - isWhitelisted
 
     function test_isWhitelisted_success() public {
         assertFalse(token.isWhitelisted(user));
@@ -307,7 +332,7 @@ contract TemporaryNudixTest is Test {
 
     // endregion
 
-    //      region - update
+    // region - update
 
     function test_update_revertIfRecipientNonWhitelisted() public {
         vm.prank(minter);

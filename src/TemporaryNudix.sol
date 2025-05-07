@@ -5,7 +5,7 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-import {ITemporaryNudix} from "src/interfaces/ITemporaryNudix.sol";
+import {ITemporaryNudix, MintBatchData} from "src/interfaces/ITemporaryNudix.sol";
 
 /**
  * @title Temporary Nudix Token (T-NUDIX)
@@ -28,6 +28,9 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
     /// @notice Role identifier for accounts allowed to mint tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
+    /// @notice Maximum value for batch operation
+    uint256 public constant MAX_BATCH_SIZE = 100;
+
     /// @dev Only addresses present here can receive token transfers
     mapping(address account => bool) private _isWhitelisted;
 
@@ -49,23 +52,19 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
 
     /**
      * @notice Mints tokens in batch to multiple recipients
-     * @param recipients Array of addresses to receive minted tokens
-     * @param amounts Array of token amounts corresponding to each recipient
+     * @param data Array of mint data
      * @dev Can only be called by addresses with MINTER_ROLE
      */
-    function mintBatch(address[] calldata recipients, uint256[] calldata amounts)
-        external
-        onlyRole(MINTER_ROLE)
-    {
-        if (recipients.length != amounts.length) {
-            revert ArrayLengthMismatch();
+    function mintBatch(MintBatchData[] calldata data) external onlyRole(MINTER_ROLE) {
+        uint256 dataSize = data.length;
+
+        if (dataSize > MAX_BATCH_SIZE) {
+            revert BatchSizeExceeded(dataSize, MAX_BATCH_SIZE);
         }
 
-        for (uint256 i = 0; i < recipients.length; i++) {
-            address recipient = recipients[i];
-            uint256 amount = amounts[i];
-
-            _mint(recipient, amount);
+        for (uint256 i; i < dataSize;) {
+            _mint(data[i].recipient, data[i].amount);
+            unchecked { ++i; }
         }
     }
 

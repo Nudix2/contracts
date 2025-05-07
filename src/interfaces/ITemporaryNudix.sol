@@ -3,9 +3,15 @@ pragma solidity 0.8.25;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
+/// @notice Struct data for mint batch operation
+struct MintBatchData {
+    address recipient;
+    uint256 amount;
+}
+
 interface ITemporaryNudix is IERC20Metadata {
-    /// @notice Thrown when the recipients and amounts array lengths do not match
-    error ArrayLengthMismatch();
+    /// @notice Thrown a mint batch operation exceeds the maximum data size
+    error BatchSizeExceeded(uint256 size, uint256 maxSize);
 
     /// @notice Thrown when trying to add an already-whitelisted address
     error AlreadyWhitelisted(address account);
@@ -23,7 +29,7 @@ interface ITemporaryNudix is IERC20Metadata {
     event Whitelisted(address account);
 
     function mint(address recipient, uint256 amount) external;
-    function mintBatch(address[] calldata recipients, uint256[] calldata amounts) external;
+    function mintBatch(MintBatchData[] calldata data) external;
     function addToWhitelist(address account) external;
     function removeFromWhitelist(address account) external;
     function isWhitelisted(address account) external view returns (bool);
