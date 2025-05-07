@@ -71,5 +71,5 @@ interface INudixSale {
     function getSale(uint8 saleId) external view returns (Sale memory);
     function getWallet() external view returns (address);
     function getPaymentToken() external view returns (address);
-    function getShareToken() external view returns (address);
+    function getTemporaryNudix() external view returns (address);
 }

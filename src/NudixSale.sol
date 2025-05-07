@@ -22,7 +22,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
     /// @notice ERC20 token used as a payment medium (e.g., USDT, USDC)
     IERC20 private immutable _paymentToken;
 
-    /// @notice Token scale is equal to 1 share token
+    /// @notice Token scale is equal to 1 temporary Nudix
     uint256 private immutable _tokenScale;
 
     /// @notice Address receiving the collected funds
@@ -210,7 +210,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
      * @notice Returns address of the TemporaryNudix token
      * @return TemporaryNudix contract address
      */
-    function getShareToken() external view returns (address) {
+    function getTemporaryNudix() external view returns (address) {
         return address(_temporaryNudix);
     }
 

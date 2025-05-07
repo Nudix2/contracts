@@ -59,7 +59,7 @@ contract NudixSaleTest is Test {
 
     function test_deploy_success() public view {
         assertEq(sale.getWallet(), wallet);
-        assertEq(sale.getShareToken(), address(shareToken));
+        assertEq(sale.getTemporaryNudix(), address(shareToken));
         assertEq(sale.getPaymentToken(), address(paymentToken));
         assertEq(sale.getCurrentSaleId(), 0);
         assertEq(sale.owner(), owner);
@@ -441,8 +441,8 @@ contract NudixSaleTest is Test {
         assertEq(sale.getPaymentToken(), address(paymentToken));
     }
 
-    function test_getShareToken() public view {
-        assertEq(sale.getShareToken(), address(shareToken));
+    function test_getTemporaryNudix() public view {
+        assertEq(sale.getTemporaryNudix(), address(shareToken));
     }
 
     // endregion

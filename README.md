@@ -38,7 +38,7 @@ Deployment of smart contracts is supposed to be via a deployment script from `/s
 2. You need to add the deployer's private key to `.env` according to .env.example
 3. Run script
    ```shell
-     $ forge script script/DeployNudixShare.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --slow --broadcast --verify
+     $ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --slow --broadcast --verify
    ```
 
 Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.
