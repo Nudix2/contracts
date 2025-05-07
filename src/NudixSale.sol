@@ -5,32 +5,15 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ITemporaryNudix} from "src/TemporaryNudix.sol";
-
-/**
- * @notice Sale round configuration
- * @param startTime Unix timestamp when sale becomes active (in seconds)
- * @param minPurchase Minimum amount of tokens user can buy (in TemporaryNudix units)
- * @param roundRate Exchange rate for the round in paymentToken
- * @param roundCap Maximum total investment in paymentToken
- * @param totalInvestment Total collected funds in current round (in paymentToken)
- * @param finalized Flag indicating if sale round is closed
- */
-struct Sale {
-    uint256 startTime;
-    uint256 minPurchase;
-    uint256 roundRate;
-    uint256 roundCap;
-    uint256 totalInvestment;
-    bool finalized;
-}
+import {INudixSale, Sale} from "src/interfaces/INudixSale.sol";
+import {ITemporaryNudix} from "src/interfaces/ITemporaryNudix.sol";
 
 /**
  * @title NudixSale
  * @notice Smart contract to manage token sale rounds for TemporaryNudix tokens.
  * @dev Each sale round has its own configuration including startTime, rate, cap, and minimum purchase.
  */
-contract NudixSale is Ownable, ReentrancyGuardTransient {
+contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     /// @notice TemporaryNudix token contract
@@ -50,56 +33,6 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
 
     /// @dev Mapping of sale round IDs to Sale configurations
     mapping(uint8 saleId => Sale) private _sales;
-
-    /*//////////////////////////////////////////////////////////////
-                                 ERRORS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Thrown when the purchase amount is below required minimum
-    error BelowMinPurchase(uint256 requiredMinimum, uint256 actualAmount);
-
-    /// @notice Thrown when trying to start a new sale while current one is still active
-    error CurrentSaleMustNotBeActive();
-
-    /// @notice Thrown when sale start time is in the past
-    error IncorrectStartTime();
-
-    /// @notice Thrown when purchase would exceed the cap of the round
-    error MaxCapReached();
-
-    /// @notice Thrown when sale has already been finalized
-    error SaleIsFinalized();
-
-    /// @notice Thrown when attempting to interact with an uninitialized sale
-    error SaleNotInitialized();
-
-    /// @notice Thrown when trying to buy before the sale start time
-    error SaleNotStarted();
-
-    /// @notice Thrown when a required address parameter is zero
-    error ZeroAddress();
-
-    /// @notice Thrown when a required numeric parameter is zero
-    error ZeroParam();
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Emitted when a new sale round is started
-    event SaleStarted(
-        uint8 indexed saleId,
-        uint256 startTime,
-        uint256 minPurchase,
-        uint256 roundRate,
-        uint256 roundCap
-    );
-
-    /// @notice Emitted when the current sale is finalized manually or via cap
-    event SaleFinalized(uint8 indexed saleId);
-
-    /// @notice Emitted on successful token purchase
-    event Sold(address indexed buyer, uint256 amount, uint256 price);
 
     /// @dev Modifier to ensure sale is not finalized
     modifier whenNotFinalized() {
@@ -180,9 +113,9 @@ contract NudixSale is Ownable, ReentrancyGuardTransient {
      * @dev Only callable by the contract owner
      */
     function startSale(
-        uint256 startTime, 
-        uint256 minPurchase, 
-        uint256 roundRate, 
+        uint256 startTime,
+        uint256 minPurchase,
+        uint256 roundRate,
         uint256 roundCap
     ) external onlyOwner {
         uint8 currentSaleId = getCurrentSaleId();

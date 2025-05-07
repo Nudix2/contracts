@@ -2,12 +2,13 @@
 pragma solidity 0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
-
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
-import {NudixSale, Sale} from "src/NudixSale.sol";
+import {INudixSale, Sale} from "src/interfaces/INudixSale.sol";
+import {NudixSale} from "src/NudixSale.sol";
 import {TemporaryNudix} from "src/TemporaryNudix.sol";
+
+import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
 
 contract NudixSaleTest is Test {
     ERC20Mock paymentToken;
@@ -44,15 +45,15 @@ contract NudixSaleTest is Test {
 
     function test_deploy_revertIfZeroAddress() public {
         // First case: shareToken == address(0)
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.ZeroAddress.selector));
         sale = new NudixSale(address(0), address(paymentToken), wallet, owner);
 
         // Second case: paymentToken == address(0)
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.ZeroAddress.selector));
         sale = new NudixSale(address(shareToken), address(0), wallet, owner);
 
         // Third case: wallet == address(0)
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroAddress.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.ZeroAddress.selector));
         sale = new NudixSale(address(shareToken), address(paymentToken), address(0), owner);
     }
 
@@ -81,14 +82,14 @@ contract NudixSaleTest is Test {
         vm.startPrank(owner);
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
-        vm.expectRevert(NudixSale.CurrentSaleMustNotBeActive.selector);
+        vm.expectRevert(INudixSale.CurrentSaleMustNotBeActive.selector);
 
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
         vm.stopPrank();
     }
 
     function test_startSale_revertIfIncorrectStartTime() public {
-        vm.expectRevert(NudixSale.IncorrectStartTime.selector);
+        vm.expectRevert(INudixSale.IncorrectStartTime.selector);
 
         vm.warp(block.timestamp + 1);
 
@@ -101,12 +102,12 @@ contract NudixSaleTest is Test {
 
         // First case: roundRate == 0
         uint256 roundRate = 0;
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroParam.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.ZeroParam.selector));
         sale.startSale(block.timestamp, MIN_PURCHASE, roundRate, ROUND_CAP);
 
         // Second case: roundCap == 0
         uint256 roundCap = 0;
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.ZeroParam.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.ZeroParam.selector));
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, roundCap);
 
         vm.stopPrank();
@@ -115,7 +116,7 @@ contract NudixSaleTest is Test {
     function test_startSale_revertIfBelowMinPurchase() public {
         uint256 minPurchase = 0;
         vm.expectRevert(
-            abi.encodeWithSelector(NudixSale.BelowMinPurchase.selector, MIN_PURCHASE, minPurchase)
+            abi.encodeWithSelector(INudixSale.BelowMinPurchase.selector, MIN_PURCHASE, minPurchase)
         );
 
         vm.prank(owner);
@@ -140,7 +141,7 @@ contract NudixSaleTest is Test {
         uint8 saleId = 1;
 
         vm.expectEmit(true, false, false, true);
-        emit NudixSale.SaleStarted(saleId, block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+        emit INudixSale.SaleStarted(saleId, block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.prank(owner);
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
@@ -175,7 +176,7 @@ contract NudixSaleTest is Test {
 
         sale.stopSale();
 
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleIsFinalized.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.SaleIsFinalized.selector));
 
         sale.stopSale();
         vm.stopPrank();
@@ -196,7 +197,7 @@ contract NudixSaleTest is Test {
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.expectEmit(true, false, false, false);
-        emit NudixSale.SaleFinalized(sale.getCurrentSaleId());
+        emit INudixSale.SaleFinalized(sale.getCurrentSaleId());
 
         sale.stopSale();
         vm.stopPrank();
@@ -212,13 +213,13 @@ contract NudixSaleTest is Test {
         sale.stopSale();
         vm.stopPrank();
 
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleIsFinalized.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.SaleIsFinalized.selector));
         sale.buy(1);
     }
 
     function test_buy_revertIfSaleNotInitialized() public {
         // First case: saleId == 0
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleNotInitialized.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.SaleNotInitialized.selector));
         vm.prank(user);
         sale.buy(VALUE);
     }
@@ -227,7 +228,7 @@ contract NudixSaleTest is Test {
         vm.prank(owner);
         sale.startSale(block.timestamp + 1 days, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.SaleNotStarted.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.SaleNotStarted.selector));
 
         vm.prank(user);
         sale.buy(VALUE);
@@ -240,7 +241,7 @@ contract NudixSaleTest is Test {
         vm.prank(owner);
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
-        vm.expectRevert(abi.encodeWithSelector(NudixSale.MaxCapReached.selector));
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.MaxCapReached.selector));
 
         vm.prank(user);
         sale.buy(reachedAmount);
@@ -312,7 +313,7 @@ contract NudixSaleTest is Test {
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.expectEmit(true, false, false, false);
-        emit NudixSale.SaleFinalized(sale.getCurrentSaleId());
+        emit INudixSale.SaleFinalized(sale.getCurrentSaleId());
 
         vm.prank(user);
         sale.buy(ROUND_CAP);
@@ -367,7 +368,7 @@ contract NudixSaleTest is Test {
         sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.expectEmit(true, false, false, true);
-        emit NudixSale.Sold(user, VALUE, sale.getCurrentPrice(VALUE));
+        emit INudixSale.Sold(user, VALUE, sale.getCurrentPrice(VALUE));
 
         vm.prank(user);
         sale.buy(VALUE);
