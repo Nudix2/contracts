@@ -247,6 +247,18 @@ contract NudixSaleTest is Test {
         sale.buy(reachedAmount);
     }
 
+    function test_buy_revertIfBelowMinPurchase(uint256 amount) public {
+        amount = bound(amount, 0, MIN_PURCHASE - 1);
+
+        vm.prank(owner);
+        sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.BelowMinPurchase.selector, MIN_PURCHASE, amount));
+
+        vm.prank(user);
+        sale.buy(amount);
+    }
+
     /// @dev roundRate calculation context:
     ///
     /// Note: USDT may have either 6 or 18 decimals depending on the network
