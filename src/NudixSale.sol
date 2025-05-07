@@ -51,9 +51,10 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
         }
 
         _temporaryNudix = ITemporaryNudix(temporaryNudix);
-        _tokenScale = 10 ** _temporaryNudix.decimals();
         _paymentToken = IERC20(paymentToken);
         _wallet = wallet;
+
+        _tokenScale = 10 ** _temporaryNudix.decimals();
     }
 
     // region - Buy -
@@ -63,7 +64,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
      * @param amount Amount of tokens (in TemporaryNudix units) to purchase
      * @dev Transfers paymentToken from sender to wallet and mints TemporaryNudix tokens
      */
-    function buy(uint256 amount) external whenNotFinalized nonReentrant {
+    function buy(uint256 amount) external nonReentrant whenNotFinalized {
         uint8 currentSaleId = getCurrentSaleId();
         Sale memory currentSale = _sales[currentSaleId];
 

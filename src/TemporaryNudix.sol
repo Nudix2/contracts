@@ -62,7 +62,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
             revert BatchSizeExceeded(dataSize, MAX_BATCH_SIZE);
         }
 
-        for (uint256 i; i < dataSize;) {
+        for (uint256 i = 0; i < dataSize;) {
             _mint(data[i].recipient, data[i].amount);
 
             unchecked {
