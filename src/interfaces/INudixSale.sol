@@ -49,11 +49,7 @@ interface INudixSale {
 
     /// @notice Emitted when a new sale round is started
     event SaleStarted(
-        uint8 indexed saleId,
-        uint256 startTime,
-        uint256 minPurchase,
-        uint256 roundRate,
-        uint256 roundCap
+        uint8 indexed saleId, uint256 startTime, uint256 minPurchase, uint256 roundRate, uint256 roundCap
     );
 
     /// @notice Emitted when the current sale is finalized manually or via cap

@@ -64,7 +64,10 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
 
         for (uint256 i; i < dataSize;) {
             _mint(data[i].recipient, data[i].amount);
-            unchecked { ++i; }
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -83,6 +86,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
         }
 
         _isWhitelisted[account] = true;
+
         emit Whitelisted(account);
     }
 
@@ -97,6 +101,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
         }
 
         _isWhitelisted[account] = false;
+
         emit Unwhitelisted(account);
     }
 
@@ -124,6 +129,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
         if (!_isWhitelisted[to]) {
             revert TransferProhibited(to);
         }
+
         super._update(from, to, value);
     }
 

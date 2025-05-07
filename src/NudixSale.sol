@@ -112,12 +112,10 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
      * @param roundCap Maximum total investment in paymentToken
      * @dev Only callable by the contract owner
      */
-    function startSale(
-        uint256 startTime,
-        uint256 minPurchase,
-        uint256 roundRate,
-        uint256 roundCap
-    ) external onlyOwner {
+    function startSale(uint256 startTime, uint256 minPurchase, uint256 roundRate, uint256 roundCap)
+        external
+        onlyOwner
+    {
         uint8 currentSaleId = getCurrentSaleId();
         if (currentSaleId != 0 && !_sales[currentSaleId].finalized) {
             revert CurrentSaleMustNotBeActive();

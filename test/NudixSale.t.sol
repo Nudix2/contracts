@@ -322,8 +322,7 @@ contract NudixSaleTest is Test {
     function test_buy_withDecimals6() public {
         // 1. Create NudixSale with new paymentToken
         ERC20Mock paymentTokenWithDec6 = new ERC20Mock(6);
-        NudixSale saleWithDec6 =
-            new NudixSale(address(shareToken), address(paymentTokenWithDec6), wallet, owner);
+        NudixSale saleWithDec6 = new NudixSale(address(shareToken), address(paymentTokenWithDec6), wallet, owner);
         vm.startPrank(owner);
         shareToken.grantRole(shareToken.MINTER_ROLE(), address(saleWithDec6));
         vm.stopPrank();
