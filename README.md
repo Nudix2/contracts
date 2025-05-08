@@ -70,9 +70,35 @@ Deployment of smart contracts is supposed to be via a deployment script from `/s
 
 1. Create `.env` file.
 2. You need to add the deployer's private key to `.env` according to `.env.example`.
-3. Run script
-   ```shell
-     $ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --slow --broadcast --verify
-   ```
+
+**Deploy TemporaryNudix.sol**
+```shell
+$ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<admin_address>"--slow --broadcast --verify
+```
+
+**Deploy NudixSale.sol**
+```shell
+$ forge script script/DeployNudixSale.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_address>,<payment_token_address>,<wallet_address>,<initial_owner_address>"--slow --broadcast --verify
+```
+
+**Start T-NUDIX sale**
+
+Before running script you need to open [file](./script/StartNudixSale.s.sol) and edit sale params.
+
+```shell
+forge script script/StartNudixSale.s.sol --rpc-url <RPC_URL> --slow --broadcast --sig "run(address)" "<NudixSale_address>"
+```
 
 Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.
+
+## Deployment addresses
+
+### BNB Smart Chain Testnet
+
+Verification of smart contracts was done via a plugin in remix ide.
+
+| Contract name | Address | Arguments |
+| ------------- |------- | --------- |
+|PaymentToken|0x4027B6af28547E047c31194Ee3C63CEa0e7a8F29|18 (decimals)|
+|TemporaryNudix|0xB4DDf53Ad725EE6B95C28C6ddFb29F1A746473C2| 0x9b5DCAA3002d77fB9dEDfc1006838d08977a3432 (admin)|
+|NudixSale|0x60df1E1531af0B2C9BF8ab9d546cDD694B00b8f8| 0xc54DBD9863C1C1b02e6e716D4A58173e9c9294F9 (wallet) 0x9b5DCAA3002d77fB9dEDfc1006838d08977a3432 (initialOwner)|
