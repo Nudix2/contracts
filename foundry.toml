@@ -13,7 +13,7 @@ bsc-mainnet = "${BSC_MAINNET_RPC_URL}"
 bsc-testnet = "${BSC_TESTNET_RPC_URL}"
 
 [etherscan]
-bsc-mainnet = {key = "${ETHERSCAN_API_KEY}", chain = "56", url = "https://api.etherscan.io/v2/api"}
-bsc-testnet = {key = "${ETHERSCAN_API_KEY}", chain = "97", url = "https://api.etherscan.io/v2/api"}
+bsc-mainnet = {key = "${ETHERSCAN_API_KEY}", chain = "56"}
+bsc-testnet = {key = "${ETHERSCAN_API_KEY}", chain = "97"}
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

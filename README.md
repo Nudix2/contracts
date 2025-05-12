@@ -6,8 +6,13 @@ The Nudix project is conducting an early public sale of the T-NUDIX token. The T
 
 Two smart contracts have been implemented:
 
+- [Nudix.sol](./src/Nudix.sol). ERC-20 standard permanent protocol token.
 - [TemporaryNudix.sol](./src/TemporaryNudix.sol). ERC-20 standard temporary token.
-- [NudixSale](./src/NudixSale.sol). A public sale process for the temporary token
+- [NudixSale](./src/NudixSale.sol). A public sale process for the temporary token.
+
+### Nudix overview
+
+Smart contract implements a simple fungible protocol token. Which in the future will be issued to users in place of a T-NUDIX. ERC-2612: Permit extension for EIP-20 signed approvals support added.
 
 ### TemporaryNudix overview
 
@@ -71,9 +76,14 @@ Deployment of smart contracts is supposed to be via a deployment script from `/s
 1. Create `.env` file.
 2. You need to add the deployer's private key to `.env` according to `.env.example`.
 
+**Deploy Nudix.sol**
+```shell
+$ forge script script/DeployNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<recipient_address>" --slow --broadcast --verify
+```
+
 **Deploy TemporaryNudix.sol**
 ```shell
-$ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<admin_address>"--slow --broadcast --verify
+$ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<admin_address>" --slow --broadcast --verify
 ```
 
 **Deploy NudixSale.sol**
