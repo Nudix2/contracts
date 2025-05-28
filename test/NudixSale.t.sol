@@ -316,6 +316,22 @@ contract NudixSaleTest is Test {
         assertEq(sale.getCurrentSale().totalInvestment, ROUND_CAP);
     }
 
+    function test_buy_addFinalizedFlag_ifRemainingLessThanMinPurchase() public {
+        paymentToken.mint(user, ROUND_CAP);
+        vm.prank(user);
+        paymentToken.approve(address(sale), ROUND_CAP);
+
+        vm.prank(owner);
+        sale.startSale(block.timestamp, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+
+        uint256 amount = ROUND_CAP - MIN_PURCHASE / 2;
+        vm.prank(user);
+        sale.buy(amount);
+
+        assertTrue(sale.getCurrentSale().finalized);
+        assertEq(sale.getCurrentSale().totalInvestment, amount);
+    }
+
     function test_buy_addFinalizedFlag_emitSaleFinalized() public {
         paymentToken.mint(user, ROUND_CAP);
         vm.prank(user);

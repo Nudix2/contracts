@@ -88,7 +88,9 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
             revert MaxCapReached();
         }
 
-        if (currentTotalInvestment == currentSale.roundCap) {
+        bool isFinalized = currentTotalInvestment == currentSale.roundCap
+            || currentSale.roundCap - currentTotalInvestment < currentSale.minPurchase;
+        if (isFinalized) {
             _sales[currentSaleId].finalized = true;
             emit SaleFinalized(currentSaleId);
         }
