@@ -20,6 +20,7 @@ The smart contract implements the following features:
 - Token minting via the mint and mintBatch functions, accessible only to accounts with specify role.
 - Restricted token transfers, allowing transfers only to whitelisted addresses (intended for future migration to the permanent NUDIX token via a dedicated smart contract).
 - ERC-2612 support: Permit extension for EIP-20 signed approvals.
+- Cap to the supply of tokens (1_000_000_000)
 - Token burning, permitted only for whitelisted accounts.
 
 ### NudixSale overview
