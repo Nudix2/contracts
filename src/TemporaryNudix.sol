@@ -2,6 +2,7 @@
 pragma solidity 0.8.25;
 
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
@@ -13,6 +14,7 @@ import {ITemporaryNudix, MintBatchData} from "src/interfaces/ITemporaryNudix.sol
  * - Minting and batch minting
  * - Burning (used in the future to exchange for the main Nudix token)
  * - EIP-2612 Permit support
+ * - Cap to the supply of tokens
  * - Transfer restrictions: only whitelisted addresses can receive tokens
  *
  * Roles:
@@ -24,7 +26,10 @@ import {ITemporaryNudix, MintBatchData} from "src/interfaces/ITemporaryNudix.sol
  *     - Can mint new tokens to whitelisted addresses
  *     - Can perform batch minting operations
  */
-contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessControl {
+contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, ERC20Capped, AccessControl {
+    /// @notice Total supply cap of T-NUDIX
+    uint256 public constant CAP = 1_000_000_000e18;
+
     /// @notice Role identifier for accounts allowed to mint tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -34,7 +39,11 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
     /// @dev Only addresses present here can receive token transfers
     mapping(address account => bool) private _isWhitelisted;
 
-    constructor(address admin) ERC20("Temporary Nudix", "T-NUDIX") ERC20Permit("TemporaryNudix") {
+    constructor(address admin)
+        ERC20("Temporary Nudix", "T-NUDIX")
+        ERC20Permit("TemporaryNudix")
+        ERC20Capped(CAP)
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -118,7 +127,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, AccessCo
     ///     - Minting (from == address(0)) is always allowed
     ///     - Burning (to == address(0)) is allowed only if sender (`from`) is whitelisted
     ///     - Transfers between accounts require recipient (`to`) to be whitelisted
-    function _update(address from, address to, uint256 value) internal override {
+    function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped) {
         bool isMint = from == address(0);
         bool isBurn = to == address(0) && _isWhitelisted[from];
 

@@ -6,6 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
 import {ITemporaryNudix, TemporaryNudix, MintBatchData} from "src/TemporaryNudix.sol";
 
@@ -65,6 +66,37 @@ contract TemporaryNudixTest is Test {
         token.mint(user, VALUE);
     }
 
+    function test_mint_revertIfERC20ExceededCap(uint256 value) public {
+        // revert first mint
+        vm.assume(value > token.CAP());
+
+        vm.expectRevert(abi.encodeWithSelector(ERC20Capped.ERC20ExceededCap.selector, value, token.CAP()));
+
+        vm.prank(minter);
+        token.mint(user, value);
+
+        // success mint
+        vm.prank(minter);
+        token.mint(user, VALUE);
+
+        assertEq(token.balanceOf(user), VALUE);
+        assertEq(token.totalSupply(), VALUE);
+
+        // revert second mint
+        value = bound(value, token.CAP() - VALUE, token.CAP() * 1e5);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ERC20Capped.ERC20ExceededCap.selector,
+                VALUE + value,
+                token.CAP()
+            )
+        );
+
+        vm.prank(minter);
+        token.mint(user, value);
+    }
+
     function test_mint_success() public {
         vm.prank(minter);
         token.mint(user, VALUE);
@@ -113,6 +145,33 @@ contract TemporaryNudixTest is Test {
                 ITemporaryNudix.BatchSizeExceeded.selector,
                 size,
                 token.MAX_BATCH_SIZE()
+            )
+        );
+
+        vm.prank(minter);
+        token.mintBatch(data);
+    }
+
+    function test_mintBatch_revertIfERC20ExceededCap(uint256 size) public {
+        size = bound(size, 1, token.MAX_BATCH_SIZE());
+
+        MintBatchData[] memory data = new MintBatchData[](size);
+
+        uint256 expectedTotalSupply;
+        for (uint256 i = 0; i < size; i++) {
+            uint256 positiveIndex = i + 1;
+            uint256 recipientAmount = token.CAP() / size + positiveIndex; // simulate amount that exceed cap
+
+            data[i] = MintBatchData({recipient: address(uint160(positiveIndex)), amount: recipientAmount});
+
+            expectedTotalSupply += recipientAmount;
+        }
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ERC20Capped.ERC20ExceededCap.selector,
+                expectedTotalSupply,
+                token.CAP()
             )
         );
 
