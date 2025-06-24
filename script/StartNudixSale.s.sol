@@ -7,10 +7,10 @@ import {INudixSale} from "src/interfaces/INudixSale.sol";
 
 contract StartNudixSale is Script {
     /// @notice Sale params. You need to edit this params
-    uint256 constant START_TIME = 1748943000; // Tuesday, June 3, 2025 9:30:00 AM
+    uint256 constant START_TIME = 1750852800; // Wednesday, June 25, 2025 12:00:00 PM (GMT)
     uint256 constant MIN_PURCHASE = 1e18;
-    uint256 constant ROUND_RATE = 0.5e18; // 1 T-NUDIX per 0.5 USDT
-    uint256 constant ROUND_CAP = 150_000e18;
+    uint256 constant ROUND_RATE = 0.00625e18; // 1 T-NUDIX per 0.00625 USDT
+    uint256 constant ROUND_CAP = 100_000e18;
 
     INudixSale nudixSale;
 

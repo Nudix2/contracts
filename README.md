@@ -92,6 +92,11 @@ $ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan
 $ forge script script/DeployNudixSale.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_address>" "<payment_token_address>" "<wallet_address>" "<initial_owner_address>" --slow --broadcast --verify
 ```
 
+**Deploy All (First deploy)**
+```shell
+$ forge script script/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_admin_address>" "<payment_token_address>" "<wallet_address>" "<sale_owner_address>" --slow --broadcast --verify
+```
+
 **Start T-NUDIX sale**
 
 Before running script you need to open [file](./script/StartNudixSale.s.sol) and edit sale params.
