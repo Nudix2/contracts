@@ -10,18 +10,33 @@ contract DeployAll is Script {
     TemporaryNudix temporaryNudix;
     NudixSale nudixSale;
 
+    /// @notice Sale params. You need to edit this params
+    uint256 constant START_TIME = 1750939200; // Thursday, June 26, 2025 12:00:00 PM (GMT)
+    uint256 constant MIN_PURCHASE = 1e18;
+    uint256 constant ROUND_RATE = 0.00625e18; // 1 T-NUDIX per 0.00625 USDT
+    uint256 constant ROUND_CAP = 100_000e18;
+
     function run(address tNudixAdmin, address USDT, address wallet, address saleOwner) public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployerPublicKey = vm.envAddress("PUBLIC_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
 
+        // Stage 0. Deploy
         temporaryNudix = new TemporaryNudix(deployerPublicKey);
-        nudixSale = new NudixSale(address(temporaryNudix), USDT, wallet, saleOwner);
+        nudixSale = new NudixSale(address(temporaryNudix), USDT, wallet, deployerPublicKey);
 
+        // Stage 1. Grant minter role
         temporaryNudix.grantRole(temporaryNudix.MINTER_ROLE(), address(nudixSale));
+
+        // Stage 2. Start first sale
+        nudixSale.startSale(START_TIME , MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+
+        // Stage 3. Renounce deployer role
         temporaryNudix.grantRole(temporaryNudix.DEFAULT_ADMIN_ROLE(), tNudixAdmin);
         temporaryNudix.renounceRole(temporaryNudix.DEFAULT_ADMIN_ROLE(), deployerPublicKey);
+
+        nudixSale.transferOwnership(saleOwner);
 
         vm.stopBroadcast();
 
