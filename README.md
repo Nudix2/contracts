@@ -10,6 +10,12 @@ Two smart contracts have been implemented:
 - [TemporaryNudix.sol](./src/TemporaryNudix.sol). ERC-20 standard temporary token.
 - [NudixSale](./src/NudixSale.sol). A public sale process for the temporary token.
 
+### Audits
+
+You can find audit report under the audits folder:
+
+- [Beosin](./audits/Beosin.pdf) (May 29th, 2025)
+
 ### Nudix overview
 
 Smart contract implements a simple fungible protocol token. Which in the future will be issued to users in place of a T-NUDIX. ERC-2612: Permit extension for EIP-20 signed approvals support added.
