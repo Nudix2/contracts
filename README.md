@@ -100,7 +100,7 @@ $ forge script script/DeployNudixSale.s.sol --rpc-url <RPC_URL> --etherscan-api-
 
 **Deploy All (First deploy)**
 ```shell
-$ forge script script/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_admin_address>" "<payment_token_address>" "<wallet_address>" "<sale_owner_address>" --slow --broadcast --verify
+$ forge script script/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address,address)" "<TemporaryNudix_admin_address>" "<payment_token_address>" "<wallet_address>" "<sale_owner_address>" "<backend_minter>" --slow --broadcast --verify
 ```
 
 **Start T-NUDIX sale**
