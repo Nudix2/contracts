@@ -11,7 +11,7 @@ contract DeployAll is Script {
     NudixSale nudixSale;
 
     /// @notice Sale params. You need to edit this params
-    uint256 constant START_TIME = 1750939200; // Thursday, June 26, 2025 12:00:00 PM (GMT)
+    uint256 constant START_TIME = 1752062400; // Wednesday, July 9, 2025 12:00:00 PM (GMT)
     uint256 constant MIN_PURCHASE = 1e18;
     uint256 constant ROUND_RATE = 0.00625e18; // 1 T-NUDIX per 0.00625 USDT
     uint256 constant ROUND_CAP = 100_000e18;
@@ -26,7 +26,7 @@ contract DeployAll is Script {
         temporaryNudix = new TemporaryNudix(deployerPublicKey);
         nudixSale = new NudixSale(address(temporaryNudix), USDT, wallet, deployerPublicKey);
 
-        // Stage 1. Grant minter role
+        // Stage 1. Grant minter roles
 
         // For NudixSale
         temporaryNudix.grantRole(temporaryNudix.MINTER_ROLE(), address(nudixSale));
