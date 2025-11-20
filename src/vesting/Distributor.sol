@@ -6,7 +6,8 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {IDistributor} from "./interfaces/IDistributor.sol";
 import {IVestingParams} from "./interfaces/IVestingParams.sol";
-import {IVesting} from "./interfaces/IVesting.sol";
+import {IVestingImpl} from "./interfaces/IVestingImpl.sol";
+import {IMigrationImpl} from "./interfaces/IMigrationImpl.sol";
 import {Period, Schedule, Beneficiary, VestingType, NUMBER_OF_VESTING_TYPES} from "./utils/Common.sol";
 
 contract Distributor is IDistributor {
@@ -63,12 +64,15 @@ contract Distributor is IDistributor {
         address vesting;
         if (vestingType == VestingType.COMMUNITY_ROUND) {
             vesting = Clones.clone(_migrationImpl);
+
+            IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
+            IMigrationImpl(vesting).initialize(baseToken, schedule, beneficiaries);
         } else {
             vesting = Clones.clone(_vestingImpl);
-        }
 
-        IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
-        IVesting(vesting).initialize(baseToken, schedule, beneficiaries);
+            IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
+            IVestingImpl(vesting).initialize(baseToken, schedule, beneficiaries);
+        }
 
         _vestingAddresses[vestingType] = vesting;
 
