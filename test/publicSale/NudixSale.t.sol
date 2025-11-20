@@ -115,9 +115,7 @@ contract NudixSaleTest is Test {
 
     function test_startSale_revertIfBelowMinPurchase() public {
         uint256 minPurchase = 0;
-        vm.expectRevert(
-            abi.encodeWithSelector(INudixSale.BelowMinPurchase.selector, MIN_PURCHASE, minPurchase)
-        );
+        vm.expectRevert(abi.encodeWithSelector(INudixSale.BelowMinPurchase.selector, MIN_PURCHASE, minPurchase));
 
         vm.prank(owner);
         sale.startSale(block.timestamp, minPurchase, ROUND_RATE, ROUND_CAP);

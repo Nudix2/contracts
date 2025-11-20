@@ -39,11 +39,7 @@ contract TemporaryNudix is ITemporaryNudix, ERC20Permit, ERC20Burnable, ERC20Cap
     /// @dev Only addresses present here can receive token transfers
     mapping(address account => bool) private _isWhitelisted;
 
-    constructor(address admin)
-        ERC20("Temporary Nudix", "T-NUDIX")
-        ERC20Permit("TemporaryNudix")
-        ERC20Capped(CAP)
-    {
+    constructor(address admin) ERC20("Temporary Nudix", "T-NUDIX") ERC20Permit("TemporaryNudix") ERC20Capped(CAP) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 

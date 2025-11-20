@@ -20,7 +20,7 @@ contract StartNudixSale is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         nudixSale = INudixSale(nudixSaleAddress);
-        nudixSale.startSale(START_TIME , MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+        nudixSale.startSale(START_TIME, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.stopBroadcast();
 

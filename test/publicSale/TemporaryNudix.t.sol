@@ -56,9 +56,7 @@ contract TemporaryNudixTest is Test {
     function test_mint_revertIfNotMinterRole() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                hacker,
-                token.MINTER_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, hacker, token.MINTER_ROLE()
             )
         );
 
@@ -85,13 +83,7 @@ contract TemporaryNudixTest is Test {
         // revert second mint
         value = bound(value, token.CAP() - VALUE, token.CAP() * 1e5);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ERC20Capped.ERC20ExceededCap.selector,
-                VALUE + value,
-                token.CAP()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ERC20Capped.ERC20ExceededCap.selector, VALUE + value, token.CAP()));
 
         vm.prank(minter);
         token.mint(user, value);
@@ -111,16 +103,11 @@ contract TemporaryNudixTest is Test {
 
     function test_mintBatch_revertIfNotMinterRole() public {
         MintBatchData[] memory data = new MintBatchData[](1);
-        data[0] = MintBatchData({
-            recipient: address(0),
-            amount: 0
-        });
+        data[0] = MintBatchData({recipient: address(0), amount: 0});
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                hacker,
-                token.MINTER_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, hacker, token.MINTER_ROLE()
             )
         );
 
@@ -134,18 +121,11 @@ contract TemporaryNudixTest is Test {
         MintBatchData[] memory data = new MintBatchData[](size);
 
         for (uint256 i = 0; i < size; i++) {
-            data[i] = MintBatchData({
-                recipient: address(0),
-                amount: 0
-            });
+            data[i] = MintBatchData({recipient: address(0), amount: 0});
         }
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                ITemporaryNudix.BatchSizeExceeded.selector,
-                size,
-                token.MAX_BATCH_SIZE()
-            )
+            abi.encodeWithSelector(ITemporaryNudix.BatchSizeExceeded.selector, size, token.MAX_BATCH_SIZE())
         );
 
         vm.prank(minter);
@@ -167,13 +147,7 @@ contract TemporaryNudixTest is Test {
             expectedTotalSupply += recipientAmount;
         }
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ERC20Capped.ERC20ExceededCap.selector,
-                expectedTotalSupply,
-                token.CAP()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ERC20Capped.ERC20ExceededCap.selector, expectedTotalSupply, token.CAP()));
 
         vm.prank(minter);
         token.mintBatch(data);
@@ -188,8 +162,7 @@ contract TemporaryNudixTest is Test {
             uint256 positiveIndex = i + 1;
 
             data[i] = MintBatchData({
-                recipient: address(uint160(positiveIndex)),
-                amount: positiveIndex * 10 ** token.decimals()
+                recipient: address(uint160(positiveIndex)), amount: positiveIndex * 10 ** token.decimals()
             });
         }
 
@@ -227,9 +200,7 @@ contract TemporaryNudixTest is Test {
     function test_addToWhitelist_revertIfNotAdmin() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                user,
-                token.DEFAULT_ADMIN_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, user, token.DEFAULT_ADMIN_ROLE()
             )
         );
 
@@ -268,9 +239,7 @@ contract TemporaryNudixTest is Test {
     function test_removeFromWhitelist_revertIfNotAdmin() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                user,
-                token.DEFAULT_ADMIN_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, user, token.DEFAULT_ADMIN_ROLE()
             )
         );
 
@@ -369,9 +338,7 @@ contract TemporaryNudixTest is Test {
         assertFalse(token.isWhitelisted(user));
         assertFalse(token.isWhitelisted(anotherUser));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0)));
 
         vm.prank(anotherUser);
         token.burnFrom(user, VALUE);
@@ -381,9 +348,7 @@ contract TemporaryNudixTest is Test {
         vm.prank(minter);
         token.mint(user, VALUE);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0))
-        );
+        vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, address(0)));
 
         vm.prank(user);
         token.burn(VALUE);
@@ -448,12 +413,10 @@ contract TemporaryNudixTest is Test {
         token.addToWhitelist(user2);
 
         // Create permit signature
-        bytes32 permitTypehash = keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+        bytes32 permitTypehash =
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
         uint256 nonce = 0;
-        bytes32 structHash =
-            keccak256(abi.encode(permitTypehash, user, user2, VALUE, nonce, deadline));
+        bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, VALUE, nonce, deadline));
         bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
 
@@ -485,11 +448,9 @@ contract TemporaryNudixTest is Test {
 
         uint256 currentNonce = token.nonces(user);
 
-        bytes32 permitTypehash = keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
-        bytes32 structHash =
-            keccak256(abi.encode(permitTypehash, user, user2, value, currentNonce, deadline));
+        bytes32 permitTypehash =
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, value, currentNonce, deadline));
         bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
 
@@ -498,9 +459,7 @@ contract TemporaryNudixTest is Test {
         // Fast forward time
         vm.warp(block.timestamp + 1);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(ERC20Permit.ERC2612ExpiredSignature.selector, deadline)
-        );
+        vm.expectRevert(abi.encodeWithSelector(ERC20Permit.ERC2612ExpiredSignature.selector, deadline));
         token.permit(user, user2, value, deadline, v, r, s);
 
         // Check that nonce has not changed
@@ -515,9 +474,8 @@ contract TemporaryNudixTest is Test {
         bytes32 s;
 
         // Use an invalid nonce (1 instead of 0)
-        bytes32 permitTypehash = keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+        bytes32 permitTypehash =
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
         bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, value, 1, deadline));
         bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
@@ -526,9 +484,7 @@ contract TemporaryNudixTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ERC20Permit.ERC2612InvalidSigner.selector,
-                0x7ec59B7f4C21AebCF9acBcCaaEC9c8036b352458,
-                user
+                ERC20Permit.ERC2612InvalidSigner.selector, 0x7ec59B7f4C21AebCF9acBcCaaEC9c8036b352458, user
             )
         );
         token.permit(user, user2, value, deadline, v, r, s);

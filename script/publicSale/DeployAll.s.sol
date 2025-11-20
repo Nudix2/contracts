@@ -34,7 +34,7 @@ contract DeployAll is Script {
         temporaryNudix.grantRole(temporaryNudix.MINTER_ROLE(), minter);
 
         // Stage 2. Start first sale
-        nudixSale.startSale(START_TIME , MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+        nudixSale.startSale(START_TIME, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         // Stage 3. Renounce deployer role
         temporaryNudix.grantRole(temporaryNudix.DEFAULT_ADMIN_ROLE(), tNudixAdmin);

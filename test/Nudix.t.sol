@@ -41,10 +41,7 @@ contract NudixTest is Test {
         vm.prank(user);
         vm.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("ERC20InsufficientBalance(address,uint256,uint256)")),
-                user,
-                0,
-                transferAmount
+                bytes4(keccak256("ERC20InsufficientBalance(address,uint256,uint256)")), user, 0, transferAmount
             )
         );
         token.transfer(recipient, transferAmount);

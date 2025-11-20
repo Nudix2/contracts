@@ -22,7 +22,7 @@ contract FinishAndStartNudixSale is Script {
         nudixSale = INudixSale(nudixSaleAddress);
 
         nudixSale.stopSale();
-        nudixSale.startSale(START_TIME , MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
+        nudixSale.startSale(START_TIME, MIN_PURCHASE, ROUND_RATE, ROUND_CAP);
 
         vm.stopBroadcast();
 
