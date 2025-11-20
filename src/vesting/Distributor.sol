@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+
+import {IDistributor} from "./interfaces/IDistributor.sol";
+import {IVestingParams} from "./interfaces/IVestingParams.sol";
+import {IVesting} from "./interfaces/IVesting.sol";
+import {Period, Schedule, Beneficiary, VestingType, NUMBER_OF_VESTING_TYPES} from "./utils/Common.sol";
+
+contract Distributor is IDistributor {
+    using SafeERC20 for IERC20;
+
+    uint40 private _startTime;
+
+    IVestingParams private _vestingParams;
+    address private _vestingImpl;
+    address private _migrationImpl;
+
+    mapping(VestingType vestingType => address vesting) private _vestingAddresses;
+
+    constructor(uint40 startTime, address vestingParams, address vestingImpl, address migrationImpl) {
+        if (startTime < block.timestamp) {
+            revert InvalidStartTime();
+        }
+
+        if (
+            vestingParams == address(0)
+            || vestingImpl == address(0)
+            || migrationImpl == address(0)
+        ) {
+            revert ZeroAddress();
+        }
+
+        _startTime = startTime;
+        _vestingParams = IVestingParams(vestingParams);
+        _vestingImpl = vestingImpl;
+        _migrationImpl = migrationImpl;
+    }
+
+    function startVestings(address baseToken) external {
+        if (block.timestamp < _startTime) {
+            revert VestingStartTimeHasNotArrived();
+        }
+
+        for (uint8 i = 0; i < NUMBER_OF_VESTING_TYPES;) {
+            _startVesting(baseToken, VestingType(i));
+
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    function _startVesting(address baseToken, VestingType vestingType) private {
+        (
+            Schedule memory schedule,
+            Beneficiary[] memory beneficiaries,
+            uint256 vestingTotalAmount
+        ) = _vestingParams.getVestingParams(vestingType);
+
+        address vesting;
+        if (vestingType == VestingType.COMMUNITY_ROUND) {
+            vesting = Clones.clone(_migrationImpl);
+        } else {
+            vesting = Clones.clone(_vestingImpl);
+        }
+
+        IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
+        IVesting(vesting).initialize(baseToken, schedule, beneficiaries);
+
+        _vestingAddresses[vestingType] = vesting;
+
+        emit VestingStarted(vestingType, vesting);
+    }
+
+    function getStartTime() external view returns (uint40) {
+        return _startTime;
+    }
+
+    function getVestingParams() external view returns (address) {
+        return address(_vestingParams);
+    }
+
+    function getVestingImpl() external view returns (address) {
+        return _vestingImpl;
+    }
+
+    function getMigrationImpl() external view returns (address) {
+        return _migrationImpl;
+    }
+}
