@@ -8,7 +8,7 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20P
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
-import {ITemporaryNudix, TemporaryNudix, MintBatchData} from "src/TemporaryNudix.sol";
+import {ITemporaryNudix, TemporaryNudix, MintBatchData} from "src/publicSale/TemporaryNudix.sol";
 
 contract TemporaryNudixTest is Test {
     TemporaryNudix token;

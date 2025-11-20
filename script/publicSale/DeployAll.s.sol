@@ -3,8 +3,8 @@ pragma solidity 0.8.25;
 
 import {Script, console} from "forge-std/Script.sol";
 
-import {TemporaryNudix} from "src/TemporaryNudix.sol";
-import {NudixSale} from "src/NudixSale.sol";
+import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
+import {NudixSale} from "src/publicSale/NudixSale.sol";
 
 contract DeployAll is Script {
     TemporaryNudix temporaryNudix;

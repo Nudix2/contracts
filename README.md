@@ -85,22 +85,22 @@ Deployment of smart contracts is supposed to be via a deployment script from `/s
 
 **Deploy Nudix.sol**
 ```shell
-$ forge script script/DeployNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<recipient_address>" --slow --broadcast --verify
+$ forge script script/publicSale/DeployNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<recipient_address>" --slow --broadcast --verify
 ```
 
 **Deploy TemporaryNudix.sol**
 ```shell
-$ forge script script/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<admin_address>" --slow --broadcast --verify
+$ forge script script/publicSale/DeployTemporaryNudix.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address)" "<admin_address>" --slow --broadcast --verify
 ```
 
 **Deploy NudixSale.sol**
 ```shell
-$ forge script script/DeployNudixSale.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_address>" "<payment_token_address>" "<wallet_address>" "<initial_owner_address>" --slow --broadcast --verify
+$ forge script script/publicSale/DeployNudixSale.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address)" "<TemporaryNudix_address>" "<payment_token_address>" "<wallet_address>" "<initial_owner_address>" --slow --broadcast --verify
 ```
 
 **Deploy All (First deploy)**
 ```shell
-$ forge script script/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address,address)" "<TemporaryNudix_admin_address>" "<payment_token_address>" "<wallet_address>" "<sale_owner_address>" "<backend_minter>" --slow --broadcast --verify
+$ forge script script/publicSale/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <API_KEY> --sig "run(address,address,address,address,address)" "<TemporaryNudix_admin_address>" "<payment_token_address>" "<wallet_address>" "<sale_owner_address>" "<backend_minter>" --slow --broadcast --verify
 ```
 
 **Start T-NUDIX sale**
@@ -108,7 +108,7 @@ $ forge script script/DeployAll.s.sol --rpc-url <RPC_URL> --etherscan-api-key <A
 Before running script you need to open [file](./script/StartNudixSale.s.sol) and edit sale params.
 
 ```shell
-forge script script/StartNudixSale.s.sol --rpc-url <RPC_URL> --slow --broadcast --sig "run(address)" "<NudixSale_address>"
+forge script script/publicSale/StartNudixSale.s.sol --rpc-url <RPC_URL> --slow --broadcast --sig "run(address)" "<NudixSale_address>"
 ```
 
 Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.

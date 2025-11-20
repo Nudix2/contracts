@@ -5,8 +5,8 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {INudixSale, Sale} from "src/interfaces/INudixSale.sol";
-import {ITemporaryNudix} from "src/interfaces/ITemporaryNudix.sol";
+import {INudixSale, Sale} from "./interfaces/INudixSale.sol";
+import {ITemporaryNudix} from "./interfaces/ITemporaryNudix.sol";
 
 /**
  * @title NudixSale

@@ -4,9 +4,9 @@ pragma solidity 0.8.25;
 import {Test, console} from "forge-std/Test.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {INudixSale, Sale} from "src/interfaces/INudixSale.sol";
-import {NudixSale} from "src/NudixSale.sol";
-import {TemporaryNudix} from "src/TemporaryNudix.sol";
+import {INudixSale, Sale} from "src/publicSale/interfaces/INudixSale.sol";
+import {NudixSale} from "src/publicSale/NudixSale.sol";
+import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
 
 import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
 

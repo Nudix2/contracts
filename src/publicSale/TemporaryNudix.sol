@@ -6,7 +6,7 @@ import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20C
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-import {ITemporaryNudix, MintBatchData} from "src/interfaces/ITemporaryNudix.sol";
+import {ITemporaryNudix, MintBatchData} from "./interfaces/ITemporaryNudix.sol";
 
 /**
  * @title Temporary Nudix Token (T-NUDIX)

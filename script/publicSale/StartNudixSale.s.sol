@@ -3,7 +3,7 @@ pragma solidity 0.8.25;
 
 import {Script, console} from "forge-std/Script.sol";
 
-import {INudixSale} from "src/interfaces/INudixSale.sol";
+import {INudixSale} from "src/publicSale/interfaces/INudixSale.sol";
 
 contract StartNudixSale is Script {
     /// @notice Sale params. You need to edit this params
