@@ -21,13 +21,16 @@ contract Distributor is IDistributor {
 
     mapping(VestingType vestingType => address vesting) private _vestingAddresses;
 
-    constructor(address vestingParams, address vestingImpl, address migrationImpl, address temporaryNudix, address sweepAccount) {
+    constructor(
+        address vestingParams,
+        address vestingImpl,
+        address migrationImpl,
+        address temporaryNudix,
+        address sweepAccount
+    ) {
         if (
-            vestingParams == address(0)
-            || vestingImpl == address(0)
-            || migrationImpl == address(0)
-            || temporaryNudix == address(0)
-            || sweepAccount == address(0)
+            vestingParams == address(0) || vestingImpl == address(0) || migrationImpl == address(0)
+                || temporaryNudix == address(0) || sweepAccount == address(0)
         ) {
             revert ZeroAddress();
         }
@@ -50,11 +53,8 @@ contract Distributor is IDistributor {
     }
 
     function _startVesting(address baseToken, VestingType vestingType) private {
-        (
-            Schedule memory schedule,
-            Beneficiary[] memory beneficiaries,
-            uint256 vestingTotalAmount
-        ) = _vestingParams.getVestingParams(vestingType);
+        (Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 vestingTotalAmount) =
+            _vestingParams.getVestingParams(vestingType);
 
         address vesting;
         if (vestingType == VestingType.COMMUNITY_ROUND) {

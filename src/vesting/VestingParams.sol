@@ -35,11 +35,7 @@ contract VestingParams is IVestingParams {
         view
         returns (Schedule memory, Beneficiary[] memory, uint256)
     {
-        return (
-            getSchedule(vestingType),
-            getBeneficiaries(vestingType),
-            _getTotalAmountByVestingType(vestingType)
-        );
+        return (getSchedule(vestingType), getBeneficiaries(vestingType), _getTotalAmountByVestingType(vestingType));
     }
 
     function getSchedule(VestingType vestingType) public view returns (Schedule memory schedule) {
@@ -112,10 +108,7 @@ contract VestingParams is IVestingParams {
         }
     }
 
-    function _validateAndStoreBeneficiaries(
-        VestingType vestingType,
-        Beneficiary[] memory beneficiaries
-    ) private {
+    function _validateAndStoreBeneficiaries(VestingType vestingType, Beneficiary[] memory beneficiaries) private {
         if (beneficiaries.length == 0) {
             revert ZeroBeneficiaries();
         }
@@ -142,11 +135,7 @@ contract VestingParams is IVestingParams {
         }
     }
 
-    function _getTotalAmountByVestingType(VestingType vestingType)
-        private
-        pure
-        returns (uint256 totalAmount)
-    {
+    function _getTotalAmountByVestingType(VestingType vestingType) private pure returns (uint256 totalAmount) {
         if (vestingType == VestingType.COMMUNITY_ROUND) {
             totalAmount = COMMUNITY_ROUND_TOTAL_AMOUNT;
         }

@@ -29,7 +29,8 @@ interface IMigrationImpl {
     /// @notice Emit when vesting schedule params has been initialized
     event ScheduleInitialized(Schedule schedule);
 
-    function initialize(address baseToken, address temporaryNudix, address sweepAccount, Schedule calldata schedule) external;
+    function initialize(address baseToken, address temporaryNudix, address sweepAccount, Schedule calldata schedule)
+        external;
     function sweep(uint256 amount) external;
     // TODO: check interfaces
 }
