@@ -2,12 +2,12 @@
 pragma solidity 0.8.25;
 
 struct Period {
-    uint256 endTime;
-    uint256 portion;
+    uint256 endTime; // TODO: uint40
+    uint256 portion; // TODO: think about which uint
 }
 
 struct Schedule {
-    uint256 startTime;
+    uint40 startTime;
     Period[] periods;
 }
 

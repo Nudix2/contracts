@@ -16,14 +16,18 @@ contract Distributor is IDistributor {
     IVestingParams private _vestingParams;
     address private _vestingImpl;
     address private _migrationImpl;
+    address private _temporaryNudix;
+    address private _sweepAccount;
 
     mapping(VestingType vestingType => address vesting) private _vestingAddresses;
 
-    constructor(address vestingParams, address vestingImpl, address migrationImpl) {
+    constructor(address vestingParams, address vestingImpl, address migrationImpl, address temporaryNudix, address sweepAccount) {
         if (
             vestingParams == address(0)
             || vestingImpl == address(0)
             || migrationImpl == address(0)
+            || temporaryNudix == address(0)
+            || sweepAccount == address(0)
         ) {
             revert ZeroAddress();
         }
@@ -31,6 +35,8 @@ contract Distributor is IDistributor {
         _vestingParams = IVestingParams(vestingParams);
         _vestingImpl = vestingImpl;
         _migrationImpl = migrationImpl;
+        _temporaryNudix = temporaryNudix;
+        _sweepAccount = sweepAccount;
     }
 
     function startVestings(address baseToken) external {
@@ -55,7 +61,7 @@ contract Distributor is IDistributor {
             vesting = Clones.clone(_migrationImpl);
 
             IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
-            IMigrationImpl(vesting).initialize(baseToken, schedule, beneficiaries);
+            IMigrationImpl(vesting).initialize(baseToken, _temporaryNudix, _sweepAccount, schedule);
         } else {
             vesting = Clones.clone(_vestingImpl);
 
