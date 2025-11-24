@@ -8,12 +8,10 @@ import {IDistributor} from "./interfaces/IDistributor.sol";
 import {IVestingParams} from "./interfaces/IVestingParams.sol";
 import {IVestingImpl} from "./interfaces/IVestingImpl.sol";
 import {IMigrationImpl} from "./interfaces/IMigrationImpl.sol";
-import {Period, Schedule, Beneficiary, VestingType, NUMBER_OF_VESTING_TYPES} from "./utils/Common.sol";
+import {Schedule, Beneficiary, VestingType, NUMBER_OF_VESTING_TYPES} from "./utils/Common.sol";
 
 contract Distributor is IDistributor {
     using SafeERC20 for IERC20;
-
-    uint40 private _startTime;
 
     IVestingParams private _vestingParams;
     address private _vestingImpl;
@@ -21,11 +19,7 @@ contract Distributor is IDistributor {
 
     mapping(VestingType vestingType => address vesting) private _vestingAddresses;
 
-    constructor(uint40 startTime, address vestingParams, address vestingImpl, address migrationImpl) {
-        if (startTime < block.timestamp) {
-            revert InvalidStartTime();
-        }
-
+    constructor(address vestingParams, address vestingImpl, address migrationImpl) {
         if (
             vestingParams == address(0)
             || vestingImpl == address(0)
@@ -34,17 +28,12 @@ contract Distributor is IDistributor {
             revert ZeroAddress();
         }
 
-        _startTime = startTime;
         _vestingParams = IVestingParams(vestingParams);
         _vestingImpl = vestingImpl;
         _migrationImpl = migrationImpl;
     }
 
     function startVestings(address baseToken) external {
-        if (block.timestamp < _startTime) {
-            revert VestingStartTimeHasNotArrived();
-        }
-
         for (uint8 i = 0; i < NUMBER_OF_VESTING_TYPES;) {
             _startVesting(baseToken, VestingType(i));
 
@@ -77,10 +66,6 @@ contract Distributor is IDistributor {
         _vestingAddresses[vestingType] = vesting;
 
         emit VestingStarted(vestingType, vesting);
-    }
-
-    function getStartTime() external view returns (uint40) {
-        return _startTime;
     }
 
     function getVestingParams() external view returns (address) {
