@@ -60,7 +60,7 @@ contract MigrationImpl is IMigrationImpl, Initializable {
                 _initialLocked[msg.sender] = _temporaryNudix.balanceOf(msg.sender);
             }
 
-            _temporaryNudix.transferFrom(msg.sender, address(this), unlockedAmount);
+            _temporaryNudix.safeTransferFrom(msg.sender, address(this), unlockedAmount);
             IERC20Burnable(address(_temporaryNudix)).burn(unlockedAmount);
 
             _released[msg.sender] += unlockedAmount;
@@ -126,7 +126,7 @@ contract MigrationImpl is IMigrationImpl, Initializable {
             revert OnlySweepAccount();
         }
 
-        _baseToken.transfer(sweepAccount, amount);
+        _baseToken.safeTransfer(sweepAccount, amount);
     }
 
     // endregion

@@ -51,7 +51,7 @@ contract VestingParams is IVestingParams {
         }
 
         if (vestingType == VestingType.IDO) {
-            periods = _getIDOPeriods(startTime);
+            periods = _getIdoPeriods(startTime);
         }
 
         if (vestingType == VestingType.TEAM) {
@@ -213,7 +213,7 @@ contract VestingParams is IVestingParams {
         }
     }
 
-    function _getIDOPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
+    function _getIdoPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
         uint8 numberOfPeriods = 8;
         periods = new Period[](numberOfPeriods);
 

@@ -17,15 +17,19 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     /// @notice TemporaryNudix token contract
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     ITemporaryNudix private immutable _temporaryNudix;
 
     /// @notice ERC20 token used as a payment medium (e.g., USDT, USDC)
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     IERC20 private immutable _paymentToken;
 
     /// @notice Token scale is equal to 1 temporary Nudix
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     uint256 private immutable _tokenScale;
 
     /// @notice Address receiving the collected funds
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address private immutable _wallet;
 
     /// @dev ID of the current sale round
@@ -35,6 +39,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
     mapping(uint8 saleId => Sale) private _sales;
 
     /// @dev Modifier to ensure sale is not finalized
+    // forge-lint: disable-next-line(unwrapped-modifier-logic)
     modifier whenNotFinalized() {
         if (_sales[_saleId].finalized) {
             revert SaleIsFinalized();
@@ -134,6 +139,7 @@ contract NudixSale is INudixSale, Ownable, ReentrancyGuardTransient {
         }
 
         _saleId += 1;
+        // forge-lint: disable-next-line(named-struct-fields)
         _sales[_saleId] = Sale(startTime, minPurchase, roundRate, roundCap, 0, false);
 
         emit SaleStarted(_saleId, startTime, minPurchase, roundRate, roundCap);

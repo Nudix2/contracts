@@ -27,7 +27,8 @@ contract NudixTest is Test {
 
         // Prank as the recipient to transfer tokens
         vm.prank(recipient);
-        token.transfer(user, transferAmount);
+        bool success = token.transfer(user, transferAmount);
+        assertTrue(success);
 
         // Assertions
         assertEq(token.balanceOf(user), transferAmount);
@@ -38,12 +39,14 @@ contract NudixTest is Test {
         uint256 transferAmount = 1000 * 10 ** 18;
 
         // Expect revert with custom error
-        vm.prank(user);
         vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("ERC20InsufficientBalance(address,uint256,uint256)")), user, 0, transferAmount
             )
         );
-        token.transfer(recipient, transferAmount);
+
+        vm.prank(user);
+        bool success = token.transfer(recipient, transferAmount);
+        assertFalse(success);
     }
 }

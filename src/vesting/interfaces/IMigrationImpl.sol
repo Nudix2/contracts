@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Schedule, Beneficiary} from "../utils/Common.sol";
+import {Schedule} from "../utils/Common.sol";
 
 interface IMigrationImpl {
     /// @notice Revert when call with zero address

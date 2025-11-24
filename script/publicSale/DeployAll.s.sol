@@ -16,7 +16,7 @@ contract DeployAll is Script {
     uint256 constant ROUND_RATE = 0.00625e18; // 1 T-NUDIX per 0.00625 USDT
     uint256 constant ROUND_CAP = 100_000e18;
 
-    function run(address tNudixAdmin, address USDT, address wallet, address saleOwner, address minter) public {
+    function run(address tNudixAdmin, address usdt, address wallet, address saleOwner, address minter) public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployerPublicKey = vm.envAddress("PUBLIC_KEY");
 
@@ -24,7 +24,7 @@ contract DeployAll is Script {
 
         // Stage 0. Deploy
         temporaryNudix = new TemporaryNudix(deployerPublicKey);
-        nudixSale = new NudixSale(address(temporaryNudix), USDT, wallet, deployerPublicKey);
+        nudixSale = new NudixSale(address(temporaryNudix), usdt, wallet, deployerPublicKey);
 
         // Stage 1. Grant minter roles
 

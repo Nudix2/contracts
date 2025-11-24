@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
@@ -142,6 +142,7 @@ contract TemporaryNudixTest is Test {
             uint256 positiveIndex = i + 1;
             uint256 recipientAmount = token.CAP() / size + positiveIndex; // simulate amount that exceed cap
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             data[i] = MintBatchData({recipient: address(uint160(positiveIndex)), amount: recipientAmount});
 
             expectedTotalSupply += recipientAmount;
@@ -161,8 +162,10 @@ contract TemporaryNudixTest is Test {
         for (uint256 i = 0; i < size; i++) {
             uint256 positiveIndex = i + 1;
 
+            // forge-lint: disable-next-line(unsafe-typecast)
+            address recipient = address(uint160(positiveIndex));
             data[i] = MintBatchData({
-                recipient: address(uint160(positiveIndex)), amount: positiveIndex * 10 ** token.decimals()
+                recipient: recipient, amount: positiveIndex * 10 ** token.decimals()
             });
         }
 
@@ -174,6 +177,7 @@ contract TemporaryNudixTest is Test {
             uint256 positiveIndex = i + 1;
             uint256 mintedAmount = positiveIndex * 10 ** token.decimals();
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             assertEq(token.balanceOf(address(uint160(positiveIndex))), mintedAmount);
             expectedTotalSupply += mintedAmount;
         }
@@ -365,7 +369,8 @@ contract TemporaryNudixTest is Test {
         vm.expectRevert(abi.encodeWithSelector(ITemporaryNudix.TransferProhibited.selector, user2));
 
         vm.prank(user);
-        token.transfer(user2, VALUE);
+        bool success = token.transfer(user2, VALUE);
+        assertFalse(success);
     }
 
     function test_update_successIfRecipientWhitelisted() public {
@@ -376,7 +381,8 @@ contract TemporaryNudixTest is Test {
         token.addToWhitelist(user2);
 
         vm.prank(user);
-        token.transfer(user2, VALUE);
+        bool success = token.transfer(user2, VALUE);
+        assertTrue(success);
 
         assertEq(token.balanceOf(user), 0);
         assertEq(token.balanceOf(user2), VALUE);
@@ -417,8 +423,8 @@ contract TemporaryNudixTest is Test {
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
         uint256 nonce = 0;
         bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, VALUE, nonce, deadline));
-        bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        bytes32 domainSeparator = token.DOMAIN_SEPARATOR();
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
 
         // Sign the permit with user's private key
         (v, r, s) = vm.sign(userPrivateKey, digest);
@@ -432,7 +438,8 @@ contract TemporaryNudixTest is Test {
 
         // Transfer tokens using the permit
         vm.prank(user2);
-        token.transferFrom(user, user2, VALUE);
+        bool success = token.transferFrom(user, user2, VALUE);
+        assertTrue(success);
 
         // Verify balances after transfer
         assertEq(token.balanceOf(user), 0);
@@ -451,8 +458,8 @@ contract TemporaryNudixTest is Test {
         bytes32 permitTypehash =
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
         bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, value, currentNonce, deadline));
-        bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        bytes32 domainSeparator = token.DOMAIN_SEPARATOR();
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
 
         (v, r, s) = vm.sign(userPrivateKey, digest);
 
@@ -477,8 +484,8 @@ contract TemporaryNudixTest is Test {
         bytes32 permitTypehash =
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
         bytes32 structHash = keccak256(abi.encode(permitTypehash, user, user2, value, 1, deadline));
-        bytes32 DOMAIN_SEPARATOR = token.DOMAIN_SEPARATOR();
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        bytes32 domainSeparator = token.DOMAIN_SEPARATOR();
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
 
         (v, r, s) = vm.sign(userPrivateKey, digest);
 
