@@ -42,6 +42,10 @@ contract VestingParams is IVestingParams {
         uint40 startTime = _startTime;
         Period[] memory periods;
 
+        if (vestingType == VestingType.COMMUNITY_ROUND) {
+            periods = _getCommunityRoundPeriods(startTime);
+        }
+
         if (vestingType == VestingType.SEED_ROUND) {
             periods = _getSeedRoundPeriods(startTime);
         }
@@ -177,12 +181,30 @@ contract VestingParams is IVestingParams {
 
     // region - Private functions for periods of schedule -
 
+    function _getCommunityRoundPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
+        uint8 numberOfPeriods = 10;
+        periods = new Period[](numberOfPeriods);
+
+        // TGE
+        periods[0] = Period({endTime: startTime, portion: 15e8}); // 15%
+
+        // Cliff period
+        uint256 cliffPeriod = 2 * MONTH;
+        periods[1] = Period({endTime: startTime + cliffPeriod, portion: 0});
+
+        // Vesting period
+        uint256 vestingStartTime = startTime + cliffPeriod;
+        for (uint8 i = 2; i < numberOfPeriods; i++) {
+            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 10.625e8}); // 10.625%
+        }
+    }
+
     function _getSeedRoundPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
         uint8 numberOfPeriods = 20;
         periods = new Period[](numberOfPeriods);
 
         // TGE
-        periods[0] = Period({endTime: startTime, portion: 1000}); // 10%
+        periods[0] = Period({endTime: startTime, portion: 10e8}); // 10%
 
         // Cliff period
         uint256 cliffPeriod = 6 * MONTH; // TODO: uint40?
@@ -191,7 +213,7 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod; // TODO: uint40?
         for (uint8 i = 2; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 500}); // 5%
+            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 5e8}); // 5%
         }
     }
 
@@ -200,7 +222,7 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // TGE
-        periods[0] = Period({endTime: startTime, portion: 400}); // 4%
+        periods[0] = Period({endTime: startTime, portion: 4e8}); // 4%
 
         // Cliff period
         uint256 cliffPeriod = 3 * MONTH;
@@ -209,26 +231,26 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 2; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 800}); // 8%
+            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 8e8}); // 8%
         }
     }
 
     function _getIdoPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint8 numberOfPeriods = 8;
+        uint8 numberOfPeriods = 7;
         periods = new Period[](numberOfPeriods);
 
         // TGE
-        periods[0] = Period({endTime: startTime, portion: 700}); // 7%
+        periods[0] = Period({endTime: startTime, portion: 7e8}); // 7%
 
         // Vesting period = 10%
         uint256 vestingStartTime = startTime;
         for (uint256 i = 1; i < 4; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 1000}); // 10%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 10e8}); // 10%
         }
 
         // Vesting period = 10%
         for (uint8 i = 4; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 2100}); // 21%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 21e8}); // 21%
         }
     }
 
@@ -243,7 +265,7 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 250}); // 2.5%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 2.5e8}); // 2.5%
         }
     }
 
@@ -258,7 +280,7 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 500}); // 5%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 5e8}); // 5%
         }
     }
 
@@ -273,7 +295,7 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 250}); // 2.5%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 2.5e8}); // 2.5%
         }
     }
 
@@ -282,12 +304,12 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // TGE
-        periods[0] = Period({endTime: startTime, portion: 1500}); // 15%
+        periods[0] = Period({endTime: startTime, portion: 15e8}); // 15%
 
         // Vesting period
         uint256 vestingStartTime = startTime;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 425}); // 4.25%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 4.25e8}); // 4.25%
         }
     }
 
@@ -302,7 +324,7 @@ contract VestingParams is IVestingParams {
         // Vesting period
         uint256 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 1000}); // 10%
+            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 10e8}); // 10%
         }
     }
 

@@ -5,14 +5,10 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 import {IVestingImpl} from "./interfaces/IVestingImpl.sol";
-import {Schedule, Period, Beneficiary} from "./utils/Common.sol";
+import {Schedule, Period, Beneficiary, BASIS_POINTS} from "./utils/Common.sol";
 
 contract VestingImpl is IVestingImpl, Initializable {
     using SafeERC20 for IERC20;
-
-    /// @notice The factor used to calculate percentages for the vesting schedule period.
-    /// It is set to 10_000 to handle basis points (0.01% increments)
-    uint256 private constant _BASIS_POINTS = 10_000; // ex: 10% = 1_000
 
     Schedule private _schedule;
     IERC20 private _baseToken;
@@ -101,7 +97,7 @@ contract VestingImpl is IVestingImpl, Initializable {
         for (uint256 i = 0; i < numberOfPeriods; i++) {
             Period memory period = schedule.periods[i];
 
-            if (period.portion > _BASIS_POINTS) {
+            if (period.portion > BASIS_POINTS) {
                 revert InvalidPortion();
             }
 
@@ -116,7 +112,7 @@ contract VestingImpl is IVestingImpl, Initializable {
             }
         }
 
-        if (totalPercentageOfPortions != _BASIS_POINTS) {
+        if (totalPercentageOfPortions != BASIS_POINTS) {
             revert IncorrectTotalPeriodPortions();
         }
 
@@ -183,14 +179,14 @@ contract VestingImpl is IVestingImpl, Initializable {
                 uint256 fullPeriod = endTime - startTime;
 
                 // Calculate the unlocked tokens based on the elapsed time within the period
-                unlockedAmount += (initialLockedAmount * partPeriod * portion) / (fullPeriod * _BASIS_POINTS);
+                unlockedAmount += (initialLockedAmount * partPeriod * portion) / (fullPeriod * BASIS_POINTS);
 
                 // Exit the loop since the unlocked tokens for the current period
                 // have been calculated
                 break;
             } else {
                 // All tokens for the current period are unlocked
-                unlockedAmount += (initialLockedAmount * portion) / _BASIS_POINTS;
+                unlockedAmount += (initialLockedAmount * portion) / BASIS_POINTS;
                 startTime = endTime;
             }
         }
