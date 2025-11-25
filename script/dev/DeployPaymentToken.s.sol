@@ -22,4 +22,6 @@ contract DeployPaymentTokenScript is Script {
         console.log("------------------ Deployment info -----------------------");
         console.log("Chain ID: ", block.chainid);
     }
+
+    function test() public {}
 }

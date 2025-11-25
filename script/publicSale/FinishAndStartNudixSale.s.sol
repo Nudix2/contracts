@@ -35,4 +35,6 @@ contract FinishAndStartNudixSale is Script {
         console.log("Round rate: ", ROUND_RATE);
         console.log("Round cap: ", ROUND_CAP);
     }
+
+    function test() public {}
 }

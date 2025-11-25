@@ -9,4 +9,6 @@ contract ERC20Mock is ERC20DecimalsMock {
     function mint(address account, uint256 value) external {
         _mint(account, value);
     }
+
+    function test() external {}
 }

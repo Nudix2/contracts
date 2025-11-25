@@ -55,4 +55,6 @@ contract DeployAll is Script {
         console.log("Chain ID: ", block.chainid);
         console.log("Deployer: ", vm.addr(deployerPrivateKey));
     }
+
+    function test() public {}
 }
