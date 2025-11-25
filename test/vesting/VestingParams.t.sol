@@ -76,7 +76,7 @@ contract VestingParamsTest is Test {
     }
 
     function test_deploy_revertIfInvalidStartTime(uint40 currentTimestamp) external {
-        vm.assume (currentTimestamp >= vestingStartTime);
+        vm.assume(currentTimestamp >= vestingStartTime);
         vm.warp(currentTimestamp);
 
         vm.expectRevert(IVestingParams.InvalidStartTime.selector);
@@ -136,10 +136,13 @@ contract VestingParamsTest is Test {
     function test_checkTotalSupply() external {
         Nudix nudix = new Nudix(address(this));
 
-        assertEq(nudix.totalSupply(), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() + vestingParams.SEED_ROUND_TOTAL_AMOUNT() +
-            vestingParams.STRATEGIC_ROUND_TOTAL_AMOUNT() + vestingParams.IDO_TOTAL_AMOUNT() + vestingParams.TEAM_TOTAL_AMOUNT() +
-            vestingParams.ADVISORS_TOTAL_AMOUNT() + vestingParams.ECOSYSTEM_TOTAL_AMOUNT() + vestingParams.LIQUIDITY_TOTAL_AMOUNT() +
-            vestingParams.RESERVE_TOTAL_AMOUNT()
+        assertEq(
+            nudix.totalSupply(),
+            vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() + vestingParams.SEED_ROUND_TOTAL_AMOUNT()
+                + vestingParams.STRATEGIC_ROUND_TOTAL_AMOUNT() + vestingParams.IDO_TOTAL_AMOUNT()
+                + vestingParams.TEAM_TOTAL_AMOUNT() + vestingParams.ADVISORS_TOTAL_AMOUNT()
+                + vestingParams.ECOSYSTEM_TOTAL_AMOUNT() + vestingParams.LIQUIDITY_TOTAL_AMOUNT()
+                + vestingParams.RESERVE_TOTAL_AMOUNT()
         );
     }
 
@@ -171,7 +174,8 @@ contract VestingParamsTest is Test {
     function test_getVestingParams() external view {
         for (uint256 i = 0; i < NUMBER_OF_VESTING_TYPES; i++) {
             VestingType vestingType = VestingType(i);
-            (Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 totalAmount) = vestingParams.getVestingParams(vestingType);
+            (Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 totalAmount) =
+                vestingParams.getVestingParams(vestingType);
 
             // Stage 1. Check schedules
             assertEq(schedule.startTime, vestingStartTime);
@@ -209,28 +213,31 @@ contract VestingParamsTest is Test {
 
     function _getBeneficiaries() private view returns (Beneficiary[][8] memory beneficiaries) {
         Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
-        seedBeneficiaries[0] = Beneficiary({ account: seedBeneficiary, amount: SEED_ROUND_TOTAL_AMOUNT});
+        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: SEED_ROUND_TOTAL_AMOUNT});
 
         Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
-        strategicBeneficiaries[0] = Beneficiary({ account: strategicBeneficiary, amount: STRATEGIC_ROUND_TOTAL_AMOUNT});
+        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: STRATEGIC_ROUND_TOTAL_AMOUNT});
 
         Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
-        idoBeneficiaries[0] = Beneficiary({ account: idoBeneficiary, amount: IDO_TOTAL_AMOUNT});
+        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: IDO_TOTAL_AMOUNT});
 
         Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
-        teamBeneficiaries[0] = Beneficiary({ account: teamBeneficiary, amount: TEAM_TOTAL_AMOUNT});
+        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: TEAM_TOTAL_AMOUNT});
+
         Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](2);
-        advisorsBeneficiaries[0] = Beneficiary({ account: advisorBeneficiaryA, amount: ADVISORS_TOTAL_AMOUNT * 0.3e18 / 1e18});
-        advisorsBeneficiaries[1] = Beneficiary({ account: advisorBeneficiaryB, amount: ADVISORS_TOTAL_AMOUNT * 0.7e18 / 1e18});
+        advisorsBeneficiaries[0] =
+            Beneficiary({account: advisorBeneficiaryA, amount: ADVISORS_TOTAL_AMOUNT * 0.3e18 / 1e18});
+        advisorsBeneficiaries[1] =
+            Beneficiary({account: advisorBeneficiaryB, amount: ADVISORS_TOTAL_AMOUNT * 0.7e18 / 1e18});
 
         Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
-        ecosystemBeneficiaries[0] = Beneficiary({ account: ecosystemBeneficiary, amount: ECOSYSTEM_TOTAL_AMOUNT });
+        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: ECOSYSTEM_TOTAL_AMOUNT});
 
         Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
-        liquidityBeneficiaries[0] = Beneficiary({ account: liquidityBeneficiary, amount: LIQUIDITY_TOTAL_AMOUNT });
+        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: LIQUIDITY_TOTAL_AMOUNT});
 
         Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
-        reserveBeneficiaries[0] = Beneficiary({ account: reserveBeneficiary, amount: RESERVE_TOTAL_AMOUNT });
+        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: RESERVE_TOTAL_AMOUNT});
 
         beneficiaries = [
             seedBeneficiaries,

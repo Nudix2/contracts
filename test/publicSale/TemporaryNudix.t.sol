@@ -164,9 +164,7 @@ contract TemporaryNudixTest is Test {
 
             // forge-lint: disable-next-line(unsafe-typecast)
             address recipient = address(uint160(positiveIndex));
-            data[i] = MintBatchData({
-                recipient: recipient, amount: positiveIndex * 10 ** token.decimals()
-            });
+            data[i] = MintBatchData({recipient: recipient, amount: positiveIndex * 10 ** token.decimals()});
         }
 
         vm.prank(minter);

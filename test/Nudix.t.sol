@@ -17,7 +17,6 @@ contract NudixTest is Test {
 
         // Deploy the token contract
         token = new Nudix(recipient);
-
     }
 
     function test_initialSupplyAssignedToRecipient() external view {
