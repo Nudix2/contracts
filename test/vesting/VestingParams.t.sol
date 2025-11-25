@@ -76,7 +76,7 @@ contract VestingParamsTest is Test {
     }
 
     function test_deploy_revertIfInvalidStartTime(uint40 currentTimestamp) external {
-        vm.assume(currentTimestamp >= vestingStartTime);
+        vm.assume(vestingStartTime < currentTimestamp);
         vm.warp(currentTimestamp);
 
         vm.expectRevert(IVestingParams.InvalidStartTime.selector);
