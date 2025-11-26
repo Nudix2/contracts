@@ -173,7 +173,8 @@ contract MigrationImplTest is Test {
 
         vm.expectRevert(IMigrationImpl.ZeroAddress.selector);
 
-        MigrationImpl(migrationAddress).initialize(address(nudix), address(temporaryNudix), invalidSweepAccount, schedule);
+        MigrationImpl(migrationAddress)
+            .initialize(address(nudix), address(temporaryNudix), invalidSweepAccount, schedule);
     }
 
     function test_deploy_revertIfInvalidPortion(uint256 invalidPortion) external {
