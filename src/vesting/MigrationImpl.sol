@@ -43,6 +43,8 @@ contract MigrationImpl is IMigrationImpl, Initializable {
 
         _initialTotalLocked = IERC20(temporaryNudix).totalSupply();
 
+        // TODO: what happens if total supply is zero?
+
         _initializeSchedule(schedule);
     }
 
@@ -54,6 +56,7 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         uint256 unlockedAmount = availableToClaim(msg.sender);
         if (unlockedAmount > 0) {
             if (_initialLocked[msg.sender] == 0) {
+                // TODO: think about that
                 _initialLocked[msg.sender] = _temporaryNudix.balanceOf(msg.sender);
             }
 
@@ -65,6 +68,21 @@ contract MigrationImpl is IMigrationImpl, Initializable {
 
             emit Claimed(msg.sender, unlockedAmount);
         }
+    }
+
+    function sweep(uint256 amount) external {
+        if (block.timestamp <= _claimEnd) {
+            revert ClaimPeriodIsNotEnded();
+        }
+
+        address sweepAccount = _sweepAccount;
+        if (msg.sender != sweepAccount) {
+            revert OnlySweepAccount();
+        }
+
+        _baseToken.safeTransfer(sweepAccount, amount);
+
+        emit Swept(amount);
     }
 
     // region - Public view function -
@@ -109,21 +127,9 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         return _computeUnlocked(initialLocked) - _released[account];
     }
 
+    // TODO: think about renaming
     function getInitialLocked(address account) public view returns (uint256) {
         return _initialLocked[account] != 0 ? _initialLocked[account] : _temporaryNudix.balanceOf(account);
-    }
-
-    function sweep(uint256 amount) external {
-        if (block.timestamp <= _claimEnd) {
-            revert ClaimPeriodIsNotEnded();
-        }
-
-        address sweepAccount = _sweepAccount;
-        if (msg.sender != sweepAccount) {
-            revert OnlySweepAccount();
-        }
-
-        _baseToken.safeTransfer(sweepAccount, amount);
     }
 
     // endregion

@@ -19,6 +19,7 @@ interface IMigrationImpl {
     /// @notice Revert when sum of vesting period portion not equal BASIS_POINTS
     error IncorrectTotalPeriodPortions();
 
+    // TODO: natspec
     error ClaimPeriodEnded();
     error ClaimPeriodIsNotEnded();
     error OnlySweepAccount();
@@ -28,6 +29,9 @@ interface IMigrationImpl {
 
     /// @notice Emit when vesting schedule params has been initialized
     event ScheduleInitialized(Schedule schedule);
+
+    /// @notice Emit when sweep has been performed
+    event Swept(uint256 amount);
 
     function initialize(address baseToken, address temporaryNudix, address sweepAccount, Schedule calldata schedule)
         external;

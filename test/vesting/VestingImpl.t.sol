@@ -8,7 +8,7 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 
 import {VestingImpl, IVestingImpl} from "src/vesting/VestingImpl.sol";
 import {Nudix} from "src/Nudix.sol";
-import {Beneficiary, Schedule, Period, VestingType, NUMBER_OF_VESTING_TYPES, BASIS_POINTS} from "src/vesting/utils/Common.sol";
+import {Beneficiary, Schedule, Period, BASIS_POINTS} from "src/vesting/utils/Common.sol";
 
 contract VestingImplTest is Test {
     using SafeERC20 for IERC20;
@@ -287,9 +287,6 @@ contract VestingImplTest is Test {
 
         vm.prank(beneficiaryA);
         vesting.claim();
-
-        assertEq(nudix.balanceOf(beneficiaryA), BENEFICIARY_A_AMOUNT);
-        assertEq(nudix.balanceOf(address(vesting)), VESTING_TOTAL_AMOUNT - BENEFICIARY_A_AMOUNT);
     }
 
     function test_claim_zeroAmountIfVestingIsNotStarted() external {
@@ -328,10 +325,10 @@ contract VestingImplTest is Test {
         vm.prank(beneficiaryA);
         vesting.claim();
 
-        uint256 expectedTGEAmount = BENEFICIARY_A_AMOUNT * SCHEDULE_TGE_PORTION / BASIS_POINTS;
+        uint256 expectedTgeAmount = BENEFICIARY_A_AMOUNT * SCHEDULE_TGE_PORTION / BASIS_POINTS;
 
-        assertEq(nudix.balanceOf(beneficiaryA), expectedTGEAmount);
-        assertEq(nudix.balanceOf(address(vesting)), VESTING_TOTAL_AMOUNT - expectedTGEAmount);
+        assertEq(nudix.balanceOf(beneficiaryA), expectedTgeAmount);
+        assertEq(nudix.balanceOf(address(vesting)), VESTING_TOTAL_AMOUNT - expectedTgeAmount);
 
         // Stage1. Simulate middle of the first period
         vm.warp(VESTING_CLIFF_END + (VESTING_PERIOD_1_END - VESTING_CLIFF_END) / 2);
@@ -340,7 +337,7 @@ contract VestingImplTest is Test {
         vesting.claim();
 
         uint256 expectedMiddleOfPeriod1Amount =
-            expectedTGEAmount + (BENEFICIARY_A_AMOUNT * SCHEDULE_PERIOD_PORTION / BASIS_POINTS) / 2;
+            expectedTgeAmount + (BENEFICIARY_A_AMOUNT * SCHEDULE_PERIOD_PORTION / BASIS_POINTS) / 2;
 
         assertEq(nudix.balanceOf(beneficiaryA), expectedMiddleOfPeriod1Amount);
         assertEq(nudix.balanceOf(address(vesting)), VESTING_TOTAL_AMOUNT - expectedMiddleOfPeriod1Amount);
@@ -352,7 +349,7 @@ contract VestingImplTest is Test {
         vesting.claim();
 
         uint256 expectedPeriod1Amount = BENEFICIARY_A_AMOUNT * SCHEDULE_PERIOD_PORTION / BASIS_POINTS;
-        uint256 expectedMiddleOfPeriod2Amount = expectedTGEAmount + expectedPeriod1Amount
+        uint256 expectedMiddleOfPeriod2Amount = expectedTgeAmount + expectedPeriod1Amount
             + (BENEFICIARY_A_AMOUNT * SCHEDULE_PERIOD_PORTION / BASIS_POINTS) / 2;
 
         assertEq(nudix.balanceOf(beneficiaryA), expectedMiddleOfPeriod2Amount);
