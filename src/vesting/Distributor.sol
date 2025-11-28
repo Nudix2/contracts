@@ -58,20 +58,32 @@ contract Distributor is IDistributor {
 
         address vesting;
         if (vestingType == VestingType.COMMUNITY_ROUND) {
-            vesting = Clones.clone(_migrationImpl);
-
-            IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
-            IMigrationImpl(vesting).initialize(baseToken, _temporaryNudix, _sweepAccount, schedule);
+            vesting = _startMigrationVesting(baseToken, schedule, vestingTotalAmount);
         } else {
-            vesting = Clones.clone(_vestingImpl);
-
-            IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
-            IVestingImpl(vesting).initialize(baseToken, schedule, beneficiaries);
+            vesting = _startClassicVesting(baseToken, schedule, beneficiaries, vestingTotalAmount);
         }
 
         _vestingAddresses[vestingType] = vesting;
 
         emit VestingStarted(vestingType, vesting);
+    }
+
+    function _startMigrationVesting(address baseToken, Schedule memory schedule, uint256 vestingTotalAmount) private returns (address vesting) {
+        vesting = Clones.clone(_migrationImpl);
+
+        IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
+        IMigrationImpl(vesting).initialize(baseToken, _temporaryNudix, _sweepAccount, schedule);
+    }
+
+    function _startClassicVesting(address baseToken, Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 vestingTotalAmount) private returns (address vesting) {
+        vesting = Clones.clone(_vestingImpl);
+
+        IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
+        IVestingImpl(vesting).initialize(baseToken, schedule, beneficiaries);
+    }
+
+    function getVestingByType(VestingType vestingType) external view returns (address) {
+        return _vestingAddresses[vestingType];
     }
 
     function getVestingParams() external view returns (address) {
@@ -84,5 +96,13 @@ contract Distributor is IDistributor {
 
     function getMigrationImpl() external view returns (address) {
         return _migrationImpl;
+    }
+
+    function getTemporaryNudix() external view returns (address) {
+        return _temporaryNudix;
+    }
+
+    function getSweepAccount() external view returns (address) {
+        return _sweepAccount;
     }
 }

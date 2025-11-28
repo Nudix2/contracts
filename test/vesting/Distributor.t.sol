@@ -1,0 +1,293 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+
+import {Test} from "forge-std/Test.sol";
+
+import {Distributor, IDistributor} from "src/vesting/Distributor.sol";
+import {VestingParams} from "src/vesting/VestingParams.sol";
+import {VestingImpl, IVestingImpl} from "src/vesting/VestingImpl.sol";
+import {MigrationImpl, IMigrationImpl} from "src/vesting/MigrationImpl.sol";
+import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
+import {Nudix} from "src/Nudix.sol";
+
+import {Beneficiary, VestingType, Schedule, Period} from "src/vesting/utils/Common.sol";
+
+uint256 constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
+uint256 constant SEED_ROUND_TOTAL_AMOUNT = 70_000_000e18;
+uint256 constant STRATEGIC_ROUND_TOTAL_AMOUNT = 110_000_000e18;
+uint256 constant IDO_TOTAL_AMOUNT = 40_000_000e18;
+uint256 constant TEAM_TOTAL_AMOUNT = 140_000_000e18;
+uint256 constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
+uint256 constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
+uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
+uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
+
+uint256 constant TOTAL_AMOUNT = 1_000_000_000e18;
+
+contract DistributorTest is Test {
+    uint40 vestingStartTime;
+
+    VestingParams vestingParams;
+    VestingImpl vestingImpl;
+    MigrationImpl migrationImpl;
+    TemporaryNudix temporaryNudix;
+    Distributor distributor;
+    Nudix nudix;
+
+    address seedBeneficiary;
+    address strategicBeneficiary;
+    address idoBeneficiary;
+    address teamBeneficiary;
+    address advisorBeneficiaryA;
+    address advisorBeneficiaryB;
+    address ecosystemBeneficiary;
+    address liquidityBeneficiary;
+    address reserveBeneficiary;
+
+    address sweepAccount;
+    address defaultAdmin;
+
+    function setUp() public {
+        vestingStartTime = uint40(block.timestamp) + 30 days;
+
+        seedBeneficiary = makeAddr("seedBeneficiary");
+        strategicBeneficiary = makeAddr("seedBeneficiary");
+        idoBeneficiary = makeAddr("idoBeneficiary");
+        teamBeneficiary = makeAddr("teamBeneficiary");
+        advisorBeneficiaryA = makeAddr("advisorBeneficiaryA");
+        advisorBeneficiaryB = makeAddr("advisorBeneficiaryB");
+        ecosystemBeneficiary = makeAddr("ecosystemBeneficiary");
+        liquidityBeneficiary = makeAddr("liquidityBeneficiary");
+        reserveBeneficiary = makeAddr("reserveBeneficiary");
+
+        sweepAccount = makeAddr("sweepAccount");
+        defaultAdmin = makeAddr("defaultAdmin");
+
+        Beneficiary[][8] memory beneficiaries = _getBeneficiaries();
+        vestingParams = new VestingParams(vestingStartTime, beneficiaries);
+        vestingImpl = new VestingImpl();
+        migrationImpl = new MigrationImpl();
+        temporaryNudix = new TemporaryNudix(defaultAdmin);
+
+        distributor = new Distributor(
+            address(vestingParams),
+            address(vestingImpl),
+            address(migrationImpl),
+            address(temporaryNudix),
+            sweepAccount
+        );
+
+        nudix = new Nudix(address(distributor));
+    }
+
+    // region - Deploy -
+
+    function test_deploy() external view {
+        assertNotEq(address(distributor), address(0));
+
+        assertEq(distributor.getVestingParams(), address(vestingParams));
+        assertEq(distributor.getVestingImpl(), address(vestingImpl));
+        assertEq(distributor.getMigrationImpl(), address(migrationImpl));
+        assertEq(distributor.getTemporaryNudix(), address(temporaryNudix));
+        assertEq(distributor.getSweepAccount(), address(sweepAccount));
+
+        assertEq(nudix.balanceOf(address(distributor)), nudix.totalSupply());
+        assertEq(nudix.balanceOf(address(distributor)), TOTAL_AMOUNT);
+    }
+
+    function test_deploy_revertIfVestingParamsIsZeroAddress() external {
+        address invalidAddress = address(0);
+
+        vm.expectRevert(IDistributor.ZeroAddress.selector);
+        new Distributor(
+            invalidAddress,
+            address(vestingImpl),
+            address(migrationImpl),
+            address(temporaryNudix),
+            sweepAccount
+        );
+    }
+
+    function test_deploy_revertIfVestingImplIsZeroAddress() external {
+        address invalidAddress = address(0);
+
+        vm.expectRevert(IDistributor.ZeroAddress.selector);
+        new Distributor(
+            address(vestingParams),
+            invalidAddress,
+            address(migrationImpl),
+            address(temporaryNudix),
+            sweepAccount
+        );
+    }
+
+    function test_deploy_revertIfMigrationImplIsZeroAddress() external {
+        address invalidAddress = address(0);
+
+        vm.expectRevert(IDistributor.ZeroAddress.selector);
+        new Distributor(
+            address(vestingParams),
+            address(vestingImpl),
+            invalidAddress,
+            address(temporaryNudix),
+            sweepAccount
+        );
+    }
+
+    function test_deploy_revertIfTemporaryNudixIsZeroAddress() external {
+        address invalidAddress = address(0);
+
+        vm.expectRevert(IDistributor.ZeroAddress.selector);
+        new Distributor(
+            address(vestingParams),
+            address(vestingImpl),
+            address(migrationImpl),
+            invalidAddress,
+            sweepAccount
+        );
+    }
+
+    function test_deploy_revertIfSweepAccountIsZeroAddress() external {
+        address invalidAddress = address(0);
+
+        vm.expectRevert(IDistributor.ZeroAddress.selector);
+        new Distributor(
+            address(vestingParams),
+            address(vestingImpl),
+            address(migrationImpl),
+            address(temporaryNudix),
+            invalidAddress
+        );
+    }
+
+    // endregion
+
+    // region - Start vestings -
+
+    function test_startVestings_checkCommunityRound() external {
+        VestingType vestingType = VestingType.COMMUNITY_ROUND;
+        distributor.startVestings(address(nudix));
+
+        address communityRoundVesting = distributor.getVestingByType(vestingType);
+        assertNotEq(communityRoundVesting, address(0));
+
+        assertEq(IMigrationImpl(communityRoundVesting).getBaseToken(), address(nudix));
+        assertEq(IMigrationImpl(communityRoundVesting).getTemporaryNudix(), address(temporaryNudix));
+        assertEq(IMigrationImpl(communityRoundVesting).getSweepAccount(), sweepAccount);
+        assertEq(nudix.balanceOf(communityRoundVesting), COMMUNITY_ROUND_TOTAL_AMOUNT);
+
+        Schedule memory schedule = IMigrationImpl(communityRoundVesting).getSchedule();
+        assertEq(schedule.startTime, vestingParams.getStartTime());
+
+        for (uint256 i = 0; i < schedule.periods.length; i++) {
+            Period memory period = schedule.periods[i];
+            Period memory expectedPeriod = vestingParams.getSchedule(vestingType).periods[i];
+
+            assertEq(period.endTime, expectedPeriod.endTime);
+            assertEq(period.portion, expectedPeriod.portion);
+        }
+    }
+
+    function test_startVestings_checkClassicalVesting() external {
+        distributor.startVestings(address(nudix));
+
+        uint256[9] memory totalAmounts = [
+            COMMUNITY_ROUND_TOTAL_AMOUNT,
+            SEED_ROUND_TOTAL_AMOUNT,
+            STRATEGIC_ROUND_TOTAL_AMOUNT,
+            IDO_TOTAL_AMOUNT,
+            TEAM_TOTAL_AMOUNT,
+            ADVISORS_TOTAL_AMOUNT,
+            ECOSYSTEM_TOTAL_AMOUNT,
+            LIQUIDITY_TOTAL_AMOUNT,
+            RESERVE_TOTAL_AMOUNT
+        ];
+
+        Beneficiary[][9] memory rawBeneficiaries = [
+            new Beneficiary[](0),
+            _getBeneficiaries()[0],
+            _getBeneficiaries()[1],
+            _getBeneficiaries()[2],
+            _getBeneficiaries()[3],
+            _getBeneficiaries()[4],
+            _getBeneficiaries()[5],
+            _getBeneficiaries()[6],
+            _getBeneficiaries()[7]
+        ];
+
+        for (uint256 i = uint256(VestingType.SEED_ROUND); i < uint256(VestingType.RESERVE); i++) {
+            VestingType vestingType = VestingType(i);
+            uint256 totalAmount = totalAmounts[i];
+            Beneficiary[] memory beneficiaries = rawBeneficiaries[i];
+
+            address vesting = distributor.getVestingByType(vestingType);
+            assertNotEq(vesting, address(0));
+
+            assertEq(IVestingImpl(vesting).getBaseToken(), address(nudix));
+            assertEq(nudix.balanceOf(vesting), totalAmount);
+
+            Schedule memory schedule = IVestingImpl(vesting).getSchedule();
+            assertEq(schedule.startTime, vestingParams.getStartTime());
+
+            for (uint256 j = 0; j < schedule.periods.length; j++) {
+                Period memory period = schedule.periods[j];
+                Period memory expectedPeriod = vestingParams.getSchedule(vestingType).periods[j];
+
+                assertEq(period.endTime, expectedPeriod.endTime);
+                assertEq(period.portion, expectedPeriod.portion);
+            }
+
+            for (uint256 k = 0; k < beneficiaries.length; k++) {
+                Beneficiary memory beneficiary = beneficiaries[k];
+
+                assertEq(IVestingImpl(vesting).lockedOf(beneficiary.account), beneficiary.amount);
+            }
+        }
+    }
+
+    // endregion
+
+    // region - Private functions -
+
+    function _getBeneficiaries() private view returns (Beneficiary[][8] memory beneficiaries) {
+        Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
+        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: SEED_ROUND_TOTAL_AMOUNT});
+
+        Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
+        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: STRATEGIC_ROUND_TOTAL_AMOUNT});
+
+        Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
+        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: IDO_TOTAL_AMOUNT});
+
+        Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
+        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: TEAM_TOTAL_AMOUNT});
+
+        Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](2);
+        advisorsBeneficiaries[0] =
+            Beneficiary({account: advisorBeneficiaryA, amount: ADVISORS_TOTAL_AMOUNT * 0.3e18 / 1e18});
+        advisorsBeneficiaries[1] =
+            Beneficiary({account: advisorBeneficiaryB, amount: ADVISORS_TOTAL_AMOUNT * 0.7e18 / 1e18});
+
+        Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
+        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: ECOSYSTEM_TOTAL_AMOUNT});
+
+        Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
+        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: LIQUIDITY_TOTAL_AMOUNT});
+
+        Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
+        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: RESERVE_TOTAL_AMOUNT});
+
+        beneficiaries = [
+            seedBeneficiaries,
+            strategicBeneficiaries,
+            idoBeneficiaries,
+            teamBeneficiaries,
+            advisorsBeneficiaries,
+            ecosystemBeneficiaries,
+            liquidityBeneficiaries,
+            reserveBeneficiaries
+        ];
+    }
+
+    // endregion
+}

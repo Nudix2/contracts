@@ -36,5 +36,9 @@ interface IMigrationImpl {
     function initialize(address baseToken, address temporaryNudix, address sweepAccount, Schedule calldata schedule)
         external;
     function sweep(uint256 amount) external;
+    function getSchedule() external view returns (Schedule memory);
+    function getBaseToken() external view returns (address);
+    function getTemporaryNudix() external view returns (address);
+    function getSweepAccount() external view returns (address);
     // TODO: check interfaces
 }
