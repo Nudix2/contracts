@@ -11,6 +11,8 @@ import {Nudix} from "src/Nudix.sol";
 import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
 import {Schedule, Period, BASIS_POINTS} from "src/vesting/utils/Common.sol";
 
+import {ERC20Mock} from "test/mocks/ERC20Mock.sol";
+
 contract MigrationImplTest is Test {
     using SafeERC20 for IERC20;
 
@@ -134,6 +136,7 @@ contract MigrationImplTest is Test {
 
         MigrationImpl migrationImpl = new MigrationImpl();
         address migrationAddress = Clones.clone(address(migrationImpl));
+        deal(address(nudix), migrationAddress, VESTING_TOTAL_AMOUNT);
 
         vm.expectRevert(IMigrationImpl.InvalidStartTime.selector);
 
@@ -184,6 +187,7 @@ contract MigrationImplTest is Test {
 
         MigrationImpl migrationImpl = new MigrationImpl();
         address migrationAddress = Clones.clone(address(migrationImpl));
+        deal(address(nudix), migrationAddress, VESTING_TOTAL_AMOUNT);
 
         vm.expectRevert(IMigrationImpl.InvalidPortion.selector);
 
@@ -198,6 +202,7 @@ contract MigrationImplTest is Test {
 
         MigrationImpl migrationImpl = new MigrationImpl();
         address migrationAddress = Clones.clone(address(migrationImpl));
+        deal(address(nudix), migrationAddress, VESTING_TOTAL_AMOUNT);
 
         vm.expectRevert(IMigrationImpl.IncorrectPeriodTime.selector);
 
@@ -211,17 +216,48 @@ contract MigrationImplTest is Test {
 
         MigrationImpl migrationImpl = new MigrationImpl();
         address migrationAddress = Clones.clone(address(migrationImpl));
+        deal(address(nudix), migrationAddress, VESTING_TOTAL_AMOUNT);
 
         vm.expectRevert(IMigrationImpl.IncorrectTotalPeriodPortions.selector);
 
         MigrationImpl(migrationAddress).initialize(address(nudix), address(temporaryNudix), sweepAccount, schedule);
     }
 
+    function test_deploy_revertIfInsufficientInitialTotalLocked() external {
+        Schedule memory schedule = _getSchedule();
+
+        address newTemporaryNudix = address(new ERC20Mock(18));
+
+        MigrationImpl migrationImpl = new MigrationImpl();
+        address migrationAddress = Clones.clone(address(migrationImpl));
+        deal(address(nudix), migrationAddress, VESTING_TOTAL_AMOUNT);
+
+        vm.expectRevert(IMigrationImpl.InsufficientInitialTotalLocked.selector);
+
+        MigrationImpl(migrationAddress).initialize(address(nudix), address(newTemporaryNudix), sweepAccount, schedule);
+    }
+
+    function test_deploy_revertIfInsufficientInitialTotalLocked_tNudixLessThanNudix(uint256 invalidAmount) external {
+        Schedule memory schedule = _getSchedule();
+
+        address newTemporaryNudix = address(new ERC20Mock(18));
+
+        MigrationImpl migrationImpl = new MigrationImpl();
+        address migrationAddress = Clones.clone(address(migrationImpl));
+
+        vm.assume(invalidAmount > nudix.balanceOf(migrationAddress));
+        ERC20Mock(newTemporaryNudix).mint(migrationAddress, invalidAmount);
+
+        vm.expectRevert(IMigrationImpl.InsufficientInitialTotalLocked.selector);
+
+        MigrationImpl(migrationAddress).initialize(address(nudix), address(newTemporaryNudix), sweepAccount, schedule);
+    }
+
     // endregion
 
     // region - Claim -
 
-    function _beforeEach_claim() private {
+    function _beforeEachClaim() private {
         vm.prank(temporaryNudixAdmin);
         temporaryNudix.addToWhitelist(address(migration));
 
@@ -230,7 +266,7 @@ contract MigrationImplTest is Test {
     }
 
     function test_claim() external {
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         // Simulate ending of the vesting
         vm.warp(VESTING_PERIOD_2_END + 1);
@@ -248,7 +284,7 @@ contract MigrationImplTest is Test {
     }
 
     function test_claim_emitClaimed() external {
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         // Simulate ending of the vesting
         vm.warp(VESTING_PERIOD_2_END + 1);
@@ -261,7 +297,7 @@ contract MigrationImplTest is Test {
     }
 
     function test_claim_zeroAmountIfVestingIsNotStarted() external {
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         vm.prank(beneficiary);
         migration.claim();
@@ -271,7 +307,7 @@ contract MigrationImplTest is Test {
     }
 
     function test_claim_zeroAmountIfAvailableToClaimIsZero() external {
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         // simulate middle of cliff period
         vm.warp(VESTING_TGE_END + (VESTING_CLIFF_END - VESTING_TGE_END) / 2);
@@ -294,7 +330,7 @@ contract MigrationImplTest is Test {
     }
 
     function test_claim_partially() external {
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         // Stage0. Simulate ending of the TGE
         vm.warp(VESTING_TGE_END);
@@ -344,7 +380,7 @@ contract MigrationImplTest is Test {
 
     function test_claim_revertClaimPeriodEnded() external {
         Schedule memory schedule = _getSchedule();
-        _beforeEach_claim();
+        _beforeEachClaim();
 
         // Simulate ending of the vesting
         vm.warp(schedule.startTime + CLAIM_PERIOD + 1);

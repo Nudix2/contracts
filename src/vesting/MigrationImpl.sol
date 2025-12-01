@@ -41,9 +41,12 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         _sweepAccount = sweepAccount;
         _claimEnd = schedule.startTime + _CLAIM_PERIOD;
 
-        _initialTotalLocked = IERC20(temporaryNudix).totalSupply();
+        uint256 initialTotalLocked = IERC20(temporaryNudix).totalSupply();
+        if (initialTotalLocked == 0 || IERC20(baseToken).balanceOf(address(this)) < initialTotalLocked) {
+            revert InsufficientInitialTotalLocked();
+        }
 
-        // TODO: what happens if total supply is zero?
+        _initialTotalLocked = initialTotalLocked;
 
         _initializeSchedule(schedule);
     }

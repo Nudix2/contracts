@@ -23,6 +23,7 @@ interface IMigrationImpl {
     error ClaimPeriodEnded();
     error ClaimPeriodIsNotEnded();
     error OnlySweepAccount();
+    error InsufficientInitialTotalLocked();
 
     /// @notice Emit when beneficiary has claimed vesting token
     event Claimed(address indexed account, uint256 amount);

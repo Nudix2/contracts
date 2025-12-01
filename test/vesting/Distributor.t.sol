@@ -45,7 +45,8 @@ contract DistributorTest is Test {
     address reserveBeneficiary;
 
     address sweepAccount;
-    address defaultAdmin;
+    address temporaryNudixAdmin;
+    address temporaryNudixMinter;
 
     function setUp() public {
         vestingStartTime = uint40(block.timestamp) + 30 days;
@@ -61,13 +62,16 @@ contract DistributorTest is Test {
         reserveBeneficiary = makeAddr("reserveBeneficiary");
 
         sweepAccount = makeAddr("sweepAccount");
-        defaultAdmin = makeAddr("defaultAdmin");
+        temporaryNudixAdmin = makeAddr("temporaryNudixAdmin");
+        temporaryNudixMinter = makeAddr("temporaryNudixMinter");
 
         Beneficiary[][8] memory beneficiaries = _getBeneficiaries();
         vestingParams = new VestingParams(vestingStartTime, beneficiaries);
         vestingImpl = new VestingImpl();
         migrationImpl = new MigrationImpl();
-        temporaryNudix = new TemporaryNudix(defaultAdmin);
+        temporaryNudix = new TemporaryNudix(temporaryNudixAdmin);
+
+        _mintTemporaryNudix(address(this), COMMUNITY_ROUND_TOTAL_AMOUNT);
 
         distributor = new Distributor(
             address(vestingParams),
@@ -287,6 +291,16 @@ contract DistributorTest is Test {
             liquidityBeneficiaries,
             reserveBeneficiaries
         ];
+    }
+
+    function _mintTemporaryNudix(address to, uint256 amount) private {
+        bytes32 minterRole = temporaryNudix.MINTER_ROLE();
+
+        vm.prank(temporaryNudixAdmin);
+        temporaryNudix.grantRole(minterRole, temporaryNudixMinter);
+
+        vm.prank(temporaryNudixMinter);
+        temporaryNudix.mint(to, amount);
     }
 
     // endregion
