@@ -14,17 +14,17 @@ import {Schedule, Period, BASIS_POINTS} from "src/vesting/utils/Common.sol";
 contract MigrationImplTest is Test {
     using SafeERC20 for IERC20;
 
-    uint256 public constant MONTH = 30 days;
+    uint40 public constant MONTH = 30 days;
     uint256 public constant VESTING_TOTAL_AMOUNT = 1_000_000e18;
 
-    uint256 public constant SCHEDULE_TGE_PORTION = 20e8;
-    uint256 public constant SCHEDULE_PERIOD_PORTION = 40e8;
-    uint256 public constant SCHEDULE_TOTAL_PERIODS = 4;
+    uint64 public constant SCHEDULE_TGE_PORTION = 20e8;
+    uint64 public constant SCHEDULE_PERIOD_PORTION = 40e8;
+    uint64 public constant SCHEDULE_TOTAL_PERIODS = 4;
 
     uint40 public immutable VESTING_TGE_END = uint40(block.timestamp) + 10;
-    uint256 public immutable VESTING_CLIFF_END = VESTING_TGE_END + MONTH;
-    uint256 public immutable VESTING_PERIOD_1_END = VESTING_CLIFF_END + MONTH;
-    uint256 public immutable VESTING_PERIOD_2_END = VESTING_PERIOD_1_END + MONTH;
+    uint40 public immutable VESTING_CLIFF_END = VESTING_TGE_END + MONTH;
+    uint40 public immutable VESTING_PERIOD_1_END = VESTING_CLIFF_END + MONTH;
+    uint40 public immutable VESTING_PERIOD_2_END = VESTING_PERIOD_1_END + MONTH;
 
     uint40 public constant CLAIM_PERIOD = 365 days;
 
@@ -177,9 +177,9 @@ contract MigrationImplTest is Test {
             .initialize(address(nudix), address(temporaryNudix), invalidSweepAccount, schedule);
     }
 
-    function test_deploy_revertIfInvalidPortion(uint256 invalidPortion) external {
+    function test_deploy_revertIfInvalidPortion(uint64 invalidPortion) external {
         Schedule memory schedule = _getSchedule();
-        invalidPortion = bound(invalidPortion, BASIS_POINTS + 1, type(uint64).max);
+        invalidPortion = uint64(bound(invalidPortion, BASIS_POINTS + 1, type(uint64).max));
         schedule.periods[0].portion = invalidPortion;
 
         MigrationImpl migrationImpl = new MigrationImpl();
@@ -190,7 +190,7 @@ contract MigrationImplTest is Test {
         MigrationImpl(migrationAddress).initialize(address(nudix), address(temporaryNudix), sweepAccount, schedule);
     }
 
-    function test_deploy_revertIfIncorrectPeriodTime(uint256 invalidPeriodTime) external {
+    function test_deploy_revertIfIncorrectPeriodTime(uint40 invalidPeriodTime) external {
         Schedule memory schedule = _getSchedule();
 
         vm.assume(invalidPeriodTime <= schedule.periods[2].endTime);

@@ -18,7 +18,7 @@ uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
 uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
 
 contract VestingParamsTest is Test {
-    uint256 public constant MONTH = 30 days;
+    uint40 public constant MONTH = 30 days;
 
     uint40 vestingStartTime;
     VestingParams vestingParams;
@@ -328,7 +328,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getCommunityRoundPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 2 * MONTH;
+        uint40 cliffPeriod = 2 * MONTH;
 
         periods = new Period[](10);
 
@@ -345,7 +345,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getSeedRoundPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 6 * MONTH;
+        uint40 cliffPeriod = 6 * MONTH;
         periods = new Period[](20);
 
         periods[0] = Period({endTime: startTime, portion: 10e8}); // 10%
@@ -371,7 +371,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getStrategicRoundPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 3 * MONTH;
+        uint40 cliffPeriod = 3 * MONTH;
         periods = new Period[](14);
 
         periods[0] = Period({endTime: startTime, portion: 4e8}); // 4%
@@ -403,7 +403,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getTeamPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 12 * MONTH;
+        uint40 cliffPeriod = 12 * MONTH;
         periods = new Period[](41);
 
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
@@ -450,7 +450,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getAdvisorsPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 9 * MONTH;
+        uint40 cliffPeriod = 9 * MONTH;
         periods = new Period[](21);
 
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
@@ -477,7 +477,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getEcosystemPeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 3 * MONTH;
+        uint40 cliffPeriod = 3 * MONTH;
         periods = new Period[](41);
 
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
@@ -550,7 +550,7 @@ contract VestingParamsTest is Test {
     }
 
     function _getReservePeriods(uint40 startTime) private pure returns (Period[] memory periods) {
-        uint256 cliffPeriod = 24 * MONTH;
+        uint40 cliffPeriod = 24 * MONTH;
         periods = new Period[](11);
 
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});

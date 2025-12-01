@@ -13,20 +13,20 @@ import {Beneficiary, Schedule, Period, BASIS_POINTS} from "src/vesting/utils/Com
 contract VestingImplTest is Test {
     using SafeERC20 for IERC20;
 
-    uint256 public constant MONTH = 30 days;
+    uint40 public constant MONTH = 30 days;
     uint256 public constant VESTING_TOTAL_AMOUNT = 1_000_000e18;
 
     uint256 public constant BENEFICIARY_A_AMOUNT = VESTING_TOTAL_AMOUNT * 0.6e18 / 1e18; // 60%
     uint256 public constant BENEFICIARY_B_AMOUNT = VESTING_TOTAL_AMOUNT * 0.4e18 / 1e18; // 40%
 
-    uint256 public constant SCHEDULE_TGE_PORTION = 20e8;
-    uint256 public constant SCHEDULE_PERIOD_PORTION = 40e8;
-    uint256 public constant SCHEDULE_TOTAL_PERIODS = 4;
+    uint64 public constant SCHEDULE_TGE_PORTION = 20e8;
+    uint64 public constant SCHEDULE_PERIOD_PORTION = 40e8;
+    uint64 public constant SCHEDULE_TOTAL_PERIODS = 4;
 
     uint40 public immutable VESTING_TGE_END = uint40(block.timestamp) + 10;
-    uint256 public immutable VESTING_CLIFF_END = VESTING_TGE_END + MONTH;
-    uint256 public immutable VESTING_PERIOD_1_END = VESTING_CLIFF_END + MONTH;
-    uint256 public immutable VESTING_PERIOD_2_END = VESTING_PERIOD_1_END + MONTH;
+    uint40 public immutable VESTING_CLIFF_END = VESTING_TGE_END + MONTH;
+    uint40 public immutable VESTING_PERIOD_1_END = VESTING_CLIFF_END + MONTH;
+    uint40 public immutable VESTING_PERIOD_2_END = VESTING_PERIOD_1_END + MONTH;
 
     address distributor;
     address beneficiaryA;
@@ -146,9 +146,9 @@ contract VestingImplTest is Test {
         VestingImpl(vestingAddress).initialize(invalidBaseToken, schedule, beneficiaries);
     }
 
-    function test_deploy_revertIfInvalidPortion(uint256 invalidPortion) external {
+    function test_deploy_revertIfInvalidPortion(uint64 invalidPortion) external {
         (Beneficiary[] memory beneficiaries, Schedule memory schedule) = _getBeneficiariesAndSchedule();
-        invalidPortion = bound(invalidPortion, BASIS_POINTS + 1, type(uint64).max);
+        invalidPortion = uint64(bound(invalidPortion, BASIS_POINTS + 1, type(uint64).max));
         schedule.periods[0].portion = invalidPortion;
 
         VestingImpl vestingImpl = new VestingImpl();
@@ -159,7 +159,7 @@ contract VestingImplTest is Test {
         VestingImpl(vestingAddress).initialize(address(nudix), schedule, beneficiaries);
     }
 
-    function test_deploy_revertIfIncorrectPeriodTime(uint256 invalidPeriodTime) external {
+    function test_deploy_revertIfIncorrectPeriodTime(uint40 invalidPeriodTime) external {
         (Beneficiary[] memory beneficiaries, Schedule memory schedule) = _getBeneficiariesAndSchedule();
 
         vm.assume(invalidPeriodTime <= schedule.periods[2].endTime);

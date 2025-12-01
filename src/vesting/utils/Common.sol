@@ -2,11 +2,11 @@
 pragma solidity 0.8.25;
 
 // The factor used to calculate percentages for the vesting schedule period.
-uint256 constant BASIS_POINTS = 1e10; // ex: 10% = 10e8, 10.625% = 10.625e8
+uint64 constant BASIS_POINTS = 1e10; // ex: 10% = 10e8, 10.625% = 10.625e8
 
 struct Period {
-    uint256 endTime; // TODO: uint40
-    uint256 portion; // TODO: think about which uint
+    uint40 endTime;
+    uint64 portion;
 }
 
 struct Schedule {

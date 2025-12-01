@@ -5,7 +5,7 @@ import {IVestingParams} from "./interfaces/IVestingParams.sol";
 import {VestingType, Beneficiary, Schedule, Period} from "./utils/Common.sol";
 
 contract VestingParams is IVestingParams {
-    uint256 public constant MONTH = 30 days;
+    uint40 public constant MONTH = 30 days;
 
     // Total amount = 1_000_000_000
     uint256 public constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
@@ -189,11 +189,11 @@ contract VestingParams is IVestingParams {
         periods[0] = Period({endTime: startTime, portion: 15e8}); // 15%
 
         // Cliff period
-        uint256 cliffPeriod = 2 * MONTH;
+        uint40 cliffPeriod = 2 * MONTH;
         periods[1] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 2; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 10.625e8}); // 10.625%
         }
@@ -207,11 +207,11 @@ contract VestingParams is IVestingParams {
         periods[0] = Period({endTime: startTime, portion: 10e8}); // 10%
 
         // Cliff period
-        uint256 cliffPeriod = 6 * MONTH; // TODO: uint40?
+        uint40 cliffPeriod = 6 * MONTH;
         periods[1] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod; // TODO: uint40?
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 2; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 5e8}); // 5%
         }
@@ -225,11 +225,11 @@ contract VestingParams is IVestingParams {
         periods[0] = Period({endTime: startTime, portion: 4e8}); // 4%
 
         // Cliff period
-        uint256 cliffPeriod = 3 * MONTH;
+        uint40 cliffPeriod = 3 * MONTH;
         periods[1] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 2; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + (i - 1) * MONTH, portion: 8e8}); // 8%
         }
@@ -243,14 +243,13 @@ contract VestingParams is IVestingParams {
         periods[0] = Period({endTime: startTime, portion: 7e8}); // 7%
 
         // Vesting period = 10%
-        uint256 vestingStartTime = startTime;
-        for (uint256 i = 1; i < 4; i++) {
-            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 10e8}); // 10%
+        for (uint8 i = 1; i < 4; i++) {
+            periods[i] = Period({endTime: startTime + i * MONTH, portion: 10e8}); // 10%
         }
 
         // Vesting period = 10%
         for (uint8 i = 4; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 21e8}); // 21%
+            periods[i] = Period({endTime: startTime + i * MONTH, portion: 21e8}); // 21%
         }
     }
 
@@ -259,11 +258,11 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // Cliff period
-        uint256 cliffPeriod = 12 * MONTH;
+        uint40 cliffPeriod = 12 * MONTH;
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 2.5e8}); // 2.5%
         }
@@ -274,11 +273,11 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // Cliff period
-        uint256 cliffPeriod = 9 * MONTH;
+        uint40 cliffPeriod = 9 * MONTH;
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 5e8}); // 5%
         }
@@ -289,11 +288,11 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // Cliff period
-        uint256 cliffPeriod = 3 * MONTH;
+        uint40 cliffPeriod = 3 * MONTH;
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 2.5e8}); // 2.5%
         }
@@ -307,9 +306,8 @@ contract VestingParams is IVestingParams {
         periods[0] = Period({endTime: startTime, portion: 15e8}); // 15%
 
         // Vesting period
-        uint256 vestingStartTime = startTime;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
-            periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 4.25e8}); // 4.25%
+            periods[i] = Period({endTime: startTime + i * MONTH, portion: 4.25e8}); // 4.25%
         }
     }
 
@@ -318,11 +316,11 @@ contract VestingParams is IVestingParams {
         periods = new Period[](numberOfPeriods);
 
         // Cliff period
-        uint256 cliffPeriod = 24 * MONTH;
+        uint40 cliffPeriod = 24 * MONTH;
         periods[0] = Period({endTime: startTime + cliffPeriod, portion: 0});
 
         // Vesting period
-        uint256 vestingStartTime = startTime + cliffPeriod;
+        uint40 vestingStartTime = startTime + cliffPeriod;
         for (uint8 i = 1; i < numberOfPeriods; i++) {
             periods[i] = Period({endTime: vestingStartTime + i * MONTH, portion: 10e8}); // 10%
         }
