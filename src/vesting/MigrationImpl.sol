@@ -59,7 +59,6 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         uint256 unlockedAmount = availableToClaim(msg.sender);
         if (unlockedAmount > 0) {
             if (_initialLocked[msg.sender] == 0) {
-                // TODO: think about that
                 _initialLocked[msg.sender] = _temporaryNudix.balanceOf(msg.sender);
             }
 
