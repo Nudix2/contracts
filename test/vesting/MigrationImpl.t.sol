@@ -62,7 +62,7 @@ contract MigrationImplTest is Test {
         assertEq(migration.getBaseToken(), address(nudix));
         assertEq(migration.getTemporaryNudix(), address(temporaryNudix));
         assertEq(migration.getSweepAccount(), sweepAccount);
-        assertEq(migration.getInitialLocked(beneficiary), temporaryNudix.totalSupply());
+        assertEq(migration.initialLockedOf(beneficiary), temporaryNudix.totalSupply());
         assertEq(migration.totalLocked() + migration.totalUnlocked(), VESTING_TOTAL_AMOUNT);
 
         assertEq(migration.getSchedule().startTime, VESTING_TGE_END);

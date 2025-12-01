@@ -112,24 +112,23 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         return initialTotalLocked - _computeUnlocked(initialTotalLocked);
     }
 
+    function initialLockedOf(address account) public view returns (uint256) {
+        return _initialLocked[account] != 0 ? _initialLocked[account] : _temporaryNudix.balanceOf(account);
+    }
+
     function unlockedOf(address account) external view returns (uint256) {
-        uint256 initialLocked = getInitialLocked(account);
+        uint256 initialLocked = initialLockedOf(account);
         return _computeUnlocked(initialLocked);
     }
 
     function lockedOf(address account) external view returns (uint256) {
-        uint256 initialLocked = getInitialLocked(account);
+        uint256 initialLocked = initialLockedOf(account);
         return initialLocked - _computeUnlocked(initialLocked);
     }
 
     function availableToClaim(address account) public view returns (uint256) {
-        uint256 initialLocked = getInitialLocked(account);
+        uint256 initialLocked = initialLockedOf(account);
         return _computeUnlocked(initialLocked) - _released[account];
-    }
-
-    // TODO: think about renaming
-    function getInitialLocked(address account) public view returns (uint256) {
-        return _initialLocked[account] != 0 ? _initialLocked[account] : _temporaryNudix.balanceOf(account);
     }
 
     // endregion
