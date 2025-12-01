@@ -68,14 +68,22 @@ contract Distributor is IDistributor {
         emit VestingStarted(vestingType, vesting);
     }
 
-    function _startMigrationVesting(address baseToken, Schedule memory schedule, uint256 vestingTotalAmount) private returns (address vesting) {
+    function _startMigrationVesting(address baseToken, Schedule memory schedule, uint256 vestingTotalAmount)
+        private
+        returns (address vesting)
+    {
         vesting = Clones.clone(_migrationImpl);
 
         IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);
         IMigrationImpl(vesting).initialize(baseToken, _temporaryNudix, _sweepAccount, schedule);
     }
 
-    function _startClassicVesting(address baseToken, Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 vestingTotalAmount) private returns (address vesting) {
+    function _startClassicVesting(
+        address baseToken,
+        Schedule memory schedule,
+        Beneficiary[] memory beneficiaries,
+        uint256 vestingTotalAmount
+    ) private returns (address vesting) {
         vesting = Clones.clone(_vestingImpl);
 
         IERC20(baseToken).safeTransfer(vesting, vestingTotalAmount);

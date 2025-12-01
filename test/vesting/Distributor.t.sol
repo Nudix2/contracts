@@ -74,11 +74,7 @@ contract DistributorTest is Test {
         _mintTemporaryNudix(address(this), COMMUNITY_ROUND_TOTAL_AMOUNT);
 
         distributor = new Distributor(
-            address(vestingParams),
-            address(vestingImpl),
-            address(migrationImpl),
-            address(temporaryNudix),
-            sweepAccount
+            address(vestingParams), address(vestingImpl), address(migrationImpl), address(temporaryNudix), sweepAccount
         );
 
         nudix = new Nudix(address(distributor));
@@ -104,11 +100,7 @@ contract DistributorTest is Test {
 
         vm.expectRevert(IDistributor.ZeroAddress.selector);
         new Distributor(
-            invalidAddress,
-            address(vestingImpl),
-            address(migrationImpl),
-            address(temporaryNudix),
-            sweepAccount
+            invalidAddress, address(vestingImpl), address(migrationImpl), address(temporaryNudix), sweepAccount
         );
     }
 
@@ -117,11 +109,7 @@ contract DistributorTest is Test {
 
         vm.expectRevert(IDistributor.ZeroAddress.selector);
         new Distributor(
-            address(vestingParams),
-            invalidAddress,
-            address(migrationImpl),
-            address(temporaryNudix),
-            sweepAccount
+            address(vestingParams), invalidAddress, address(migrationImpl), address(temporaryNudix), sweepAccount
         );
     }
 
@@ -130,11 +118,7 @@ contract DistributorTest is Test {
 
         vm.expectRevert(IDistributor.ZeroAddress.selector);
         new Distributor(
-            address(vestingParams),
-            address(vestingImpl),
-            invalidAddress,
-            address(temporaryNudix),
-            sweepAccount
+            address(vestingParams), address(vestingImpl), invalidAddress, address(temporaryNudix), sweepAccount
         );
     }
 
@@ -143,11 +127,7 @@ contract DistributorTest is Test {
 
         vm.expectRevert(IDistributor.ZeroAddress.selector);
         new Distributor(
-            address(vestingParams),
-            address(vestingImpl),
-            address(migrationImpl),
-            invalidAddress,
-            sweepAccount
+            address(vestingParams), address(vestingImpl), address(migrationImpl), invalidAddress, sweepAccount
         );
     }
 
