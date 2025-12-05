@@ -7,16 +7,22 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {IVestingImpl} from "./interfaces/IVestingImpl.sol";
 import {Schedule, Period, Beneficiary, BASIS_POINTS} from "./utils/Common.sol";
 
+/**
+ * @title VestingImpl
+ * @notice This contract implements the vesting logic, allowing users to claim their vested tokens.
+ */
 contract VestingImpl is IVestingImpl, Initializable {
     using SafeERC20 for IERC20;
 
     Schedule private _schedule;
     IERC20 private _baseToken;
 
-    mapping(address account => uint256 amount) private _initialLocked;
-
     uint256 private _initialTotalLocked;
 
+    /// @notice Mapping to track amounts initially locked per account
+    mapping(address account => uint256 amount) private _initialLocked;
+
+    /// @notice Mapping to track amounts released per account
     mapping(address account => uint256 amount) private _released;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -24,6 +30,12 @@ contract VestingImpl is IVestingImpl, Initializable {
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialization function for the vesting contract
+     * @param baseToken Address of the base token that will be vested
+     * @param schedule The structure that defines the vesting schedule
+     * @param beneficiaries The array of beneficiaries with their respective amounts
+     */
     function initialize(address baseToken, Schedule calldata schedule, Beneficiary[] calldata beneficiaries)
         external
         initializer
@@ -38,6 +50,11 @@ contract VestingImpl is IVestingImpl, Initializable {
         _initializeBeneficiaries(beneficiaries, baseToken);
     }
 
+    /**
+     * @notice Allows users to claim their vested tokens by burning temporary NUDIX tokens
+     *
+     * @dev Users can claim their vested tokens based on the vesting schedule.
+     */
     function claim() external {
         uint256 unlockedAmount = availableToClaim(msg.sender);
 
@@ -51,32 +68,39 @@ contract VestingImpl is IVestingImpl, Initializable {
 
     // region - Public view function -
 
+    /// @notice Retrieves the vesting schedule structure
     function getSchedule() external view returns (Schedule memory) {
         return _schedule;
     }
 
+    /// @notice Returns the base token address
     function getBaseToken() external view returns (address) {
         return address(_baseToken);
     }
 
+    /// @notice Returns the total amount of unlocked tokens
     function totalUnlocked() external view returns (uint256) {
         return _computeUnlocked(_initialTotalLocked);
     }
 
+    /// @notice Returns the total amount of locked tokens
     function totalLocked() external view returns (uint256) {
         uint256 initialTotalLocked = _initialTotalLocked;
         return initialTotalLocked - _computeUnlocked(initialTotalLocked);
     }
 
+    /// @notice Returns the amount of unlocked tokens for a specific account
     function unlockedOf(address account) external view returns (uint256) {
         return _computeUnlocked(_initialLocked[account]);
     }
 
+    /// @notice Returns the amount of locked tokens for a specific account
     function lockedOf(address account) external view returns (uint256) {
         uint256 initialLocked = _initialLocked[account];
         return initialLocked - _computeUnlocked(initialLocked);
     }
 
+    /// @notice Returns the available amount of unlocked tokens that can be claimed by a specific account
     function availableToClaim(address account) public view returns (uint256) {
         return _computeUnlocked(_initialLocked[account]) - _released[account];
     }

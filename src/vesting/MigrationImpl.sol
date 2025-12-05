@@ -8,9 +8,20 @@ import {Schedule, Period, BASIS_POINTS} from "./utils/Common.sol";
 import {IERC20Burnable} from "./interfaces/IERC20Burnable.sol";
 import {IMigrationImpl} from "./interfaces/IMigrationImpl.sol";
 
+/**
+ * @title MigrationImpl
+ * @notice Contract for vesting implementation of Community round
+ *
+ * @dev This contract implements the migration vesting logic, allowing users to claim their vested tokens
+ * by burning temporary NUDIX tokens within a specified claim period. After the claim period ends,
+ * the sweep account can collect any remaining tokens.
+ *
+ * Temporary nudix was distributed earlier to community round participants.
+ */
 contract MigrationImpl is IMigrationImpl, Initializable {
     using SafeERC20 for IERC20;
 
+    /// @notice Claim period duration constant (365 days)
     uint40 private constant _CLAIM_PERIOD = 365 days;
 
     Schedule private _schedule;
@@ -20,7 +31,11 @@ contract MigrationImpl is IMigrationImpl, Initializable {
     uint40 private _claimEnd;
 
     uint256 private _initialTotalLocked;
+
+    /// @notice Mapping to track amounts initially locked per account
     mapping(address account => uint256 amount) private _initialLocked;
+
+    /// @notice Mapping to track amounts released per account
     mapping(address account => uint256 amount) private _released;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -28,6 +43,13 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialization function for the vesting contract
+     * @param baseToken Address of the base token that will be vested
+     * @param temporaryNudix Address of the temporary NUDIX token
+     * @param sweepAccount Address of the sweep account
+     * @param schedule The structure that defines the vesting schedule
+     */
     function initialize(address baseToken, address temporaryNudix, address sweepAccount, Schedule calldata schedule)
         external
         initializer
@@ -51,6 +73,12 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         _initializeSchedule(schedule);
     }
 
+    /**
+     * @notice Allows users to claim their vested tokens by burning temporary NUDIX tokens
+     *
+     * @dev Users can claim their vested tokens only within the claim period. After the claim period ends,
+     * the claim function will revert.
+     */
     function claim() external {
         if (block.timestamp > _claimEnd) {
             revert ClaimPeriodEnded();
@@ -72,6 +100,10 @@ contract MigrationImpl is IMigrationImpl, Initializable {
         }
     }
 
+    /**
+     * @notice Allows the sweep account to collect remaining tokens after the claim period has ended
+     * @param amount Amount of tokens to sweep
+     */
     function sweep(uint256 amount) external {
         if (block.timestamp <= _claimEnd) {
             revert ClaimPeriodIsNotEnded();
@@ -89,45 +121,55 @@ contract MigrationImpl is IMigrationImpl, Initializable {
 
     // region - Public view function -
 
+    /// @notice Retrieves the vesting schedule structure
     function getSchedule() external view returns (Schedule memory) {
         return _schedule;
     }
 
+    /// @notice Returns the base token address
     function getBaseToken() external view returns (address) {
         return address(_baseToken);
     }
 
+    /// @notice Returns the total amount of unlocked tokens
     function getTemporaryNudix() external view returns (address) {
         return address(_temporaryNudix);
     }
 
+    /// @notice Returns the sweep account address
     function getSweepAccount() external view returns (address) {
         return address(_sweepAccount);
     }
 
+    /// @notice Initial locked amount of a specific account
+    function initialLockedOf(address account) public view returns (uint256) {
+        return _initialLocked[account] != 0 ? _initialLocked[account] : _temporaryNudix.balanceOf(account);
+    }
+
+    /// @notice Returns the total amount of unlocked tokens
     function totalUnlocked() external view returns (uint256) {
         return _computeUnlocked(_initialTotalLocked);
     }
 
+    /// @notice Returns the total amount of locked tokens
     function totalLocked() external view returns (uint256) {
         uint256 initialTotalLocked = _initialTotalLocked;
         return initialTotalLocked - _computeUnlocked(initialTotalLocked);
     }
 
-    function initialLockedOf(address account) public view returns (uint256) {
-        return _initialLocked[account] != 0 ? _initialLocked[account] : _temporaryNudix.balanceOf(account);
-    }
-
+    /// @notice Returns the amount of unlocked tokens for a specific account
     function unlockedOf(address account) external view returns (uint256) {
         uint256 initialLocked = initialLockedOf(account);
         return _computeUnlocked(initialLocked);
     }
 
+    /// @notice Returns the amount of locked tokens for a specific account
     function lockedOf(address account) external view returns (uint256) {
         uint256 initialLocked = initialLockedOf(account);
         return initialLocked - _computeUnlocked(initialLocked);
     }
 
+    /// @notice Returns the available amount of unlocked tokens that can be claimed by a specific account
     function availableToClaim(address account) public view returns (uint256) {
         uint256 initialLocked = initialLockedOf(account);
         return _computeUnlocked(initialLocked) - _released[account];

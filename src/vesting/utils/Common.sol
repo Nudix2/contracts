@@ -6,7 +6,7 @@ uint64 constant BASIS_POINTS = 1e10; // ex: 10% = 10e8, 10.625% = 10.625e8
 
 struct Period {
     uint40 endTime;
-    uint64 portion;
+    uint64 portion; // in BASIS_POINTS
 }
 
 struct Schedule {

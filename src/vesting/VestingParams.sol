@@ -4,6 +4,10 @@ pragma solidity 0.8.25;
 import {IVestingParams} from "./interfaces/IVestingParams.sol";
 import {VestingType, Beneficiary, Schedule, Period} from "./utils/Common.sol";
 
+/**
+ * @title VestingParams
+ * @notice Contract that stores vesting parameters for different vesting types
+ */
 contract VestingParams is IVestingParams {
     uint40 public constant MONTH = 30 days;
 
@@ -18,9 +22,18 @@ contract VestingParams is IVestingParams {
     uint256 public constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
     uint256 public constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
 
+    /// @notice Mapping to track list of beneficiaries per vesting type
     mapping(VestingType vestingType => Beneficiary[] beneficiaries) private _beneficiaries;
     uint40 private _startTime;
 
+    /**
+     * @notice Constructor to initialize vesting parameters
+     * @param startTime Start time for all vesting schedules
+     * @param beneficiaries List of beneficiaries for each vesting type.
+     *
+     * @dev Except community round all other vesting beneficiaries must be initialized here.
+     * For community round, beneficiaries are holders of temporary NUDIX tokens.
+     */
     constructor(uint40 startTime, Beneficiary[][8] memory beneficiaries) {
         if (startTime < block.timestamp) {
             revert InvalidStartTime();
@@ -30,6 +43,10 @@ contract VestingParams is IVestingParams {
         _storeBeneficiaries(beneficiaries);
     }
 
+    /**
+     * @notice Returns vesting parameters for a specific vesting type
+     * @param vestingType The type of vesting
+     */
     function getVestingParams(VestingType vestingType)
         external
         view
@@ -38,6 +55,10 @@ contract VestingParams is IVestingParams {
         return (getSchedule(vestingType), getBeneficiaries(vestingType), _getTotalAmountByVestingType(vestingType));
     }
 
+    /**
+     * @notice Returns the vesting schedule for a specific vesting type
+     * @param vestingType The type of vesting
+     */
     function getSchedule(VestingType vestingType) public view returns (Schedule memory schedule) {
         uint40 startTime = _startTime;
         Period[] memory periods;
@@ -81,10 +102,15 @@ contract VestingParams is IVestingParams {
         schedule = Schedule({startTime: startTime, periods: periods});
     }
 
+    /**
+     * @notice Returns the list of beneficiaries for a specific vesting type
+     * @param vestingType The type of vesting
+     */
     function getBeneficiaries(VestingType vestingType) public view returns (Beneficiary[] memory) {
         return _beneficiaries[vestingType];
     }
 
+    /// @notice Returns the start time for all vesting schedules
     function getStartTime() external view returns (uint40) {
         return _startTime;
     }

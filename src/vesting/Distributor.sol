@@ -10,6 +10,14 @@ import {IVestingImpl} from "./interfaces/IVestingImpl.sol";
 import {IMigrationImpl} from "./interfaces/IMigrationImpl.sol";
 import {Schedule, Beneficiary, VestingType, NUMBER_OF_VESTING_TYPES} from "./utils/Common.sol";
 
+/**
+ * @title Distributor
+ * @notice Contract for start vestings for different vesting types
+ *
+ * @dev This contract allows to start vestings for different vesting types by cloning vesting implementation contracts.
+ * It uses the OpenZeppelin Clones library to create minimal proxy contracts for each vesting.
+ * The contract retrieves vesting parameters from a separate VestingParams contract and initializes.
+ */
 contract Distributor is IDistributor {
     using SafeERC20 for IERC20;
 
@@ -19,8 +27,17 @@ contract Distributor is IDistributor {
     address private _temporaryNudix;
     address private _sweepAccount;
 
+    /// @notice Mapping to track vesting address by vesting type
     mapping(VestingType vestingType => address vesting) private _vestingAddresses;
 
+    /**
+     * Constructor of the Distributor contract
+     * @param vestingParams Address of the VestingParams contract
+     * @param vestingImpl Address of the VestingImpl contract for cloning
+     * @param migrationImpl Address of the MigrationImpl contract for cloning
+     * @param temporaryNudix Address of the temporary NUDIX token
+     * @param sweepAccount Address of the sweep account for sweep the remainder NUDIX from the migration vesting
+     */
     constructor(
         address vestingParams,
         address vestingImpl,
@@ -42,6 +59,10 @@ contract Distributor is IDistributor {
         _sweepAccount = sweepAccount;
     }
 
+    /**
+     * @notice Starts vestings for all defined vesting types
+     * @param baseToken Address of the NUDIX token to be vested
+     */
     function startVestings(address baseToken) external {
         for (uint8 i = 0; i < NUMBER_OF_VESTING_TYPES;) {
             _startVesting(baseToken, VestingType(i));
@@ -51,6 +72,42 @@ contract Distributor is IDistributor {
             }
         }
     }
+
+    // region - Public view functions -
+
+    /// @notice Returns the vesting address for a given vesting type
+    function getVestingByType(VestingType vestingType) external view returns (address) {
+        return _vestingAddresses[vestingType];
+    }
+
+    /// @notice Returns the address of the VestingParams contract
+    function getVestingParams() external view returns (address) {
+        return address(_vestingParams);
+    }
+
+    /// @notice Returns the address of the VestingImpl contract
+    function getVestingImpl() external view returns (address) {
+        return _vestingImpl;
+    }
+
+    /// @notice Returns the address of the MigrationImpl contract
+    function getMigrationImpl() external view returns (address) {
+        return _migrationImpl;
+    }
+
+    /// @notice Returns the address of the temporary NUDIX token
+    function getTemporaryNudix() external view returns (address) {
+        return _temporaryNudix;
+    }
+
+    /// @notice Returns the address of the sweep account
+    function getSweepAccount() external view returns (address) {
+        return _sweepAccount;
+    }
+
+    // endregion
+
+    // region - Private functions -
 
     function _startVesting(address baseToken, VestingType vestingType) private {
         (Schedule memory schedule, Beneficiary[] memory beneficiaries, uint256 vestingTotalAmount) =
@@ -90,27 +147,5 @@ contract Distributor is IDistributor {
         IVestingImpl(vesting).initialize(baseToken, schedule, beneficiaries);
     }
 
-    function getVestingByType(VestingType vestingType) external view returns (address) {
-        return _vestingAddresses[vestingType];
-    }
-
-    function getVestingParams() external view returns (address) {
-        return address(_vestingParams);
-    }
-
-    function getVestingImpl() external view returns (address) {
-        return _vestingImpl;
-    }
-
-    function getMigrationImpl() external view returns (address) {
-        return _migrationImpl;
-    }
-
-    function getTemporaryNudix() external view returns (address) {
-        return _temporaryNudix;
-    }
-
-    function getSweepAccount() external view returns (address) {
-        return _sweepAccount;
-    }
+    // endregion
 }
