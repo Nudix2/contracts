@@ -5,17 +5,22 @@ import {Test} from "forge-std/Test.sol";
 
 import {Nudix} from "src/Nudix.sol";
 import {VestingParams, IVestingParams} from "src/vesting/VestingParams.sol";
-import {Beneficiary, Schedule, Period, VestingType, NUMBER_OF_VESTING_TYPES} from "src/vesting/utils/Common.sol";
-
-uint256 constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
-uint256 constant SEED_ROUND_TOTAL_AMOUNT = 70_000_000e18;
-uint256 constant STRATEGIC_ROUND_TOTAL_AMOUNT = 110_000_000e18;
-uint256 constant IDO_TOTAL_AMOUNT = 40_000_000e18;
-uint256 constant TEAM_TOTAL_AMOUNT = 140_000_000e18;
-uint256 constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
-uint256 constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
-uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
-uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
+import {
+    Beneficiary,
+    Schedule,
+    Period,
+    VestingType,
+    NUMBER_OF_VESTING_TYPES,
+    COMMUNITY_ROUND_TOTAL_AMOUNT,
+    SEED_ROUND_TOTAL_AMOUNT,
+    STRATEGIC_ROUND_TOTAL_AMOUNT,
+    IDO_TOTAL_AMOUNT,
+    TEAM_TOTAL_AMOUNT,
+    ADVISORS_TOTAL_AMOUNT,
+    ECOSYSTEM_TOTAL_AMOUNT,
+    LIQUIDITY_TOTAL_AMOUNT,
+    RESERVE_TOTAL_AMOUNT
+} from "src/vesting/utils/Common.sol";
 
 contract VestingParamsTest is Test {
     uint40 public constant MONTH = 30 days;
@@ -138,14 +143,17 @@ contract VestingParamsTest is Test {
 
         assertEq(
             nudix.totalSupply(),
-            vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() + vestingParams.SEED_ROUND_TOTAL_AMOUNT()
-                + vestingParams.STRATEGIC_ROUND_TOTAL_AMOUNT() + vestingParams.IDO_TOTAL_AMOUNT()
-                + vestingParams.TEAM_TOTAL_AMOUNT() + vestingParams.ADVISORS_TOTAL_AMOUNT()
-                + vestingParams.ECOSYSTEM_TOTAL_AMOUNT() + vestingParams.LIQUIDITY_TOTAL_AMOUNT()
-                + vestingParams.RESERVE_TOTAL_AMOUNT()
+            COMMUNITY_ROUND_TOTAL_AMOUNT
+                + SEED_ROUND_TOTAL_AMOUNT
+                + STRATEGIC_ROUND_TOTAL_AMOUNT
+                + IDO_TOTAL_AMOUNT
+                + TEAM_TOTAL_AMOUNT
+                + ADVISORS_TOTAL_AMOUNT
+                + ECOSYSTEM_TOTAL_AMOUNT
+                + LIQUIDITY_TOTAL_AMOUNT
+                + RESERVE_TOTAL_AMOUNT
         );
     }
-
     // endregion
 
     // region - Get Schedule -

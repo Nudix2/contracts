@@ -10,17 +10,21 @@ import {MigrationImpl, IMigrationImpl} from "src/vesting/MigrationImpl.sol";
 import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
 import {Nudix} from "src/Nudix.sol";
 
-import {Beneficiary, VestingType, Schedule, Period} from "src/vesting/utils/Common.sol";
-
-uint256 constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
-uint256 constant SEED_ROUND_TOTAL_AMOUNT = 70_000_000e18;
-uint256 constant STRATEGIC_ROUND_TOTAL_AMOUNT = 110_000_000e18;
-uint256 constant IDO_TOTAL_AMOUNT = 40_000_000e18;
-uint256 constant TEAM_TOTAL_AMOUNT = 140_000_000e18;
-uint256 constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
-uint256 constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
-uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
-uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
+import {
+    Beneficiary,
+    VestingType,
+    Schedule,
+    Period,
+    COMMUNITY_ROUND_TOTAL_AMOUNT,
+    SEED_ROUND_TOTAL_AMOUNT,
+    STRATEGIC_ROUND_TOTAL_AMOUNT,
+    IDO_TOTAL_AMOUNT,
+    TEAM_TOTAL_AMOUNT,
+    ADVISORS_TOTAL_AMOUNT,
+    ECOSYSTEM_TOTAL_AMOUNT,
+    LIQUIDITY_TOTAL_AMOUNT,
+    RESERVE_TOTAL_AMOUNT
+} from "src/vesting/utils/Common.sol";
 
 uint256 constant TOTAL_AMOUNT = 1_000_000_000e18;
 

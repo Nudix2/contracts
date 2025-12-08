@@ -1,26 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
-import {Distributor, IDistributor} from "src/vesting/Distributor.sol";
+import {Distributor} from "src/vesting/Distributor.sol";
 import {VestingParams} from "src/vesting/VestingParams.sol";
 import {VestingImpl, IVestingImpl} from "src/vesting/VestingImpl.sol";
 import {MigrationImpl, IMigrationImpl} from "src/vesting/MigrationImpl.sol";
 import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
 import {Nudix} from "src/Nudix.sol";
 
-import {Beneficiary, VestingType, Schedule, BASIS_POINTS} from "src/vesting/utils/Common.sol";
-
-uint256 constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
-uint256 constant SEED_ROUND_TOTAL_AMOUNT = 70_000_000e18;
-uint256 constant STRATEGIC_ROUND_TOTAL_AMOUNT = 110_000_000e18;
-uint256 constant IDO_TOTAL_AMOUNT = 40_000_000e18;
-uint256 constant TEAM_TOTAL_AMOUNT = 140_000_000e18;
-uint256 constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
-uint256 constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
-uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
-uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
+import {
+    Beneficiary,
+    VestingType,
+    Schedule,
+    BASIS_POINTS,
+    COMMUNITY_ROUND_TOTAL_AMOUNT,
+    SEED_ROUND_TOTAL_AMOUNT,
+    STRATEGIC_ROUND_TOTAL_AMOUNT,
+    IDO_TOTAL_AMOUNT,
+    TEAM_TOTAL_AMOUNT,
+    ADVISORS_TOTAL_AMOUNT,
+    ECOSYSTEM_TOTAL_AMOUNT,
+    LIQUIDITY_TOTAL_AMOUNT,
+    RESERVE_TOTAL_AMOUNT
+} from "src/vesting/utils/Common.sol";
 
 contract BeneficiaryTest is Test {
     uint256 constant COMMUNITY_ROUND_BENEFICIARY_AMOUNT = 1_000_000e18;
@@ -77,7 +81,7 @@ contract BeneficiaryTest is Test {
         IMigrationImpl(migration).claim();
 
         assertEq(nudix.balanceOf(communityBeneficiary), 0);
-        assertEq(nudix.balanceOf(migration), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT());
+        assertEq(nudix.balanceOf(migration), COMMUNITY_ROUND_TOTAL_AMOUNT);
         assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
     }
 
@@ -100,7 +104,7 @@ contract BeneficiaryTest is Test {
         uint256 expectedAmount = COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[0].portion / BASIS_POINTS;
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedAmount);
-        assertEq(nudix.balanceOf(migration), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() - expectedAmount);
+        assertEq(nudix.balanceOf(migration), COMMUNITY_ROUND_TOTAL_AMOUNT - expectedAmount);
         assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedAmount);
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
@@ -129,7 +133,7 @@ contract BeneficiaryTest is Test {
         uint256 expectedHalfOnTheFirstPeriodAmount = expectedTgeAmount + COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[2].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedHalfOnTheFirstPeriodAmount);
-        assertEq(nudix.balanceOf(migration), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() - expectedHalfOnTheFirstPeriodAmount);
+        assertEq(nudix.balanceOf(migration), COMMUNITY_ROUND_TOTAL_AMOUNT - expectedHalfOnTheFirstPeriodAmount);
         assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheFirstPeriodAmount);
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedHalfOnTheFirstPeriodAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
@@ -158,7 +162,7 @@ contract BeneficiaryTest is Test {
         uint256 expectedHalfOnTheLastPeriodAmount = COMMUNITY_ROUND_BENEFICIARY_AMOUNT - COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedHalfOnTheLastPeriodAmount);
-        assertEq(nudix.balanceOf(migration), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() - expectedHalfOnTheLastPeriodAmount);
+        assertEq(nudix.balanceOf(migration), COMMUNITY_ROUND_TOTAL_AMOUNT - expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
@@ -238,7 +242,7 @@ contract BeneficiaryTest is Test {
         uint256 expectedHalfOnTheLastPeriodAmount = TEAM_TOTAL_AMOUNT - TEAM_TOTAL_AMOUNT * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(teamBeneficiary), expectedHalfOnTheLastPeriodAmount);
-        assertEq(nudix.balanceOf(vesting), vestingParams.TEAM_TOTAL_AMOUNT() - expectedHalfOnTheLastPeriodAmount);
+        assertEq(nudix.balanceOf(vesting), TEAM_TOTAL_AMOUNT - expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(vesting).lockedOf(teamBeneficiary), TEAM_TOTAL_AMOUNT - expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(vesting).unlockedOf(teamBeneficiary), expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(vesting).availableToClaim(teamBeneficiary), 0);
@@ -257,13 +261,12 @@ contract BeneficiaryTest is Test {
         // Stage 1. Deploy VestingParams contract
         vestingParams = new VestingParams(vestingStartTime, beneficiaries);
 
-
         // Stage 2. Deploy Vesting and Migration implementations
         vestingImpl = new VestingImpl();
         migrationImpl = new MigrationImpl();
 
         // Simulate that temporary Nudix was minted and sold during public sale
-        _mintTemporaryNudix(address(this), vestingParams.COMMUNITY_ROUND_TOTAL_AMOUNT() - COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
+        _mintTemporaryNudix(address(this), COMMUNITY_ROUND_TOTAL_AMOUNT - COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
         _mintTemporaryNudix(communityBeneficiary, COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
 
         // Stage 3. Deploy Distributor contract

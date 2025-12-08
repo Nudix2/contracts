@@ -2,7 +2,21 @@
 pragma solidity 0.8.25;
 
 import {IVestingParams} from "./interfaces/IVestingParams.sol";
-import {VestingType, Beneficiary, Schedule, Period} from "./utils/Common.sol";
+import {
+    VestingType,
+    Beneficiary,
+    Schedule,
+    Period,
+    COMMUNITY_ROUND_TOTAL_AMOUNT,
+    SEED_ROUND_TOTAL_AMOUNT,
+    STRATEGIC_ROUND_TOTAL_AMOUNT,
+    IDO_TOTAL_AMOUNT,
+    TEAM_TOTAL_AMOUNT,
+    ADVISORS_TOTAL_AMOUNT,
+    ECOSYSTEM_TOTAL_AMOUNT,
+    LIQUIDITY_TOTAL_AMOUNT,
+    RESERVE_TOTAL_AMOUNT
+} from "./utils/Common.sol";
 
 /**
  * @title VestingParams
@@ -10,17 +24,6 @@ import {VestingType, Beneficiary, Schedule, Period} from "./utils/Common.sol";
  */
 contract VestingParams is IVestingParams {
     uint40 public constant MONTH = 30 days;
-
-    // Total amount = 1_000_000_000
-    uint256 public constant COMMUNITY_ROUND_TOTAL_AMOUNT = 30_000_000e18;
-    uint256 public constant SEED_ROUND_TOTAL_AMOUNT = 70_000_000e18;
-    uint256 public constant STRATEGIC_ROUND_TOTAL_AMOUNT = 110_000_000e18;
-    uint256 public constant IDO_TOTAL_AMOUNT = 40_000_000e18;
-    uint256 public constant TEAM_TOTAL_AMOUNT = 140_000_000e18;
-    uint256 public constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
-    uint256 public constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
-    uint256 public constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
-    uint256 public constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
 
     /// @notice Mapping to track list of beneficiaries per vesting type
     mapping(VestingType vestingType => Beneficiary[] beneficiaries) private _beneficiaries;
@@ -165,6 +168,7 @@ contract VestingParams is IVestingParams {
         }
     }
 
+    // TODO: move to common
     function _getTotalAmountByVestingType(VestingType vestingType) private pure returns (uint256 totalAmount) {
         if (vestingType == VestingType.COMMUNITY_ROUND) {
             totalAmount = COMMUNITY_ROUND_TOTAL_AMOUNT;

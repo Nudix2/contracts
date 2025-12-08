@@ -1,4 +1,5 @@
 # Nudix
+// TODO: rewrite readme
 
 The Nudix project is conducting an early public sale of the T-NUDIX token. The T-NUDIX token is temporary. We anticipate that in the future, a dedicated smart contract will be developed to allow the exchange of the temporary token for the actual NUDIX token.
 
@@ -112,3 +113,16 @@ forge script script/publicSale/StartNudixSale.s.sol --rpc-url <RPC_URL> --slow -
 ```
 
 Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.
+
+Deploy
+1. set up beneficiaries into deploy script
+2. call script
+   ```shell
+       forge script script/vesting/FirstDeploy.s.sol:FirstDeployScript --rpc-url bnb-testnet --broadcast --sig "run(address, address)" "<Temporary nudix address>" "Sweep account>" --slow --verify -vvvv --interactives 1
+   ```
+      For BNB Smart Chain Testnet: forge script script/dev/DeployTemporaryNudix.s.sol:DeployTemporaryNudixScript --rpc-url bnb-testnet --broadcast --slow --verify -vvvv --interactives 1
+      Temporary nudix token (BnB Smart Chain Mainnet): 0xd2D87c5946a7673297cE4222FFc1BF3a9719ff4C
+3. for t-nudix
+      ```solidity
+      temporaryNudix.addToWhitelist(migration);
+      ```
