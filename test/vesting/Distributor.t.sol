@@ -10,13 +10,7 @@ import {MigrationImpl, IMigrationImpl} from "src/vesting/MigrationImpl.sol";
 import {TemporaryNudix} from "src/publicSale/TemporaryNudix.sol";
 import {Nudix} from "src/Nudix.sol";
 
-import {
-    Beneficiary,
-    VestingType,
-    Schedule,
-    Period,
-    getTotalAmountByVestingType
-} from "src/vesting/utils/Common.sol";
+import {Beneficiary, VestingType, Schedule, Period, getTotalAmountByVestingType} from "src/vesting/utils/Common.sol";
 
 uint256 constant TOTAL_AMOUNT = 1_000_000_000e18;
 
@@ -231,31 +225,41 @@ contract DistributorTest is Test {
 
     function _getBeneficiaries() private view returns (Beneficiary[][8] memory beneficiaries) {
         Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
-        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
+        seedBeneficiaries[0] =
+            Beneficiary({account: seedBeneficiary, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
 
         Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
-        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)});
+        strategicBeneficiaries[0] = Beneficiary({
+            account: strategicBeneficiary, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)
+        });
 
         Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
-        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: getTotalAmountByVestingType(VestingType.IDO)});
+        idoBeneficiaries[0] =
+            Beneficiary({account: idoBeneficiary, amount: getTotalAmountByVestingType(VestingType.IDO)});
 
         Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
-        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: getTotalAmountByVestingType(VestingType.TEAM)});
+        teamBeneficiaries[0] =
+            Beneficiary({account: teamBeneficiary, amount: getTotalAmountByVestingType(VestingType.TEAM)});
 
         Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](2);
-        advisorsBeneficiaries[0] =
-            Beneficiary({account: advisorBeneficiaryA, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.3e18 / 1e18});
-        advisorsBeneficiaries[1] =
-            Beneficiary({account: advisorBeneficiaryB, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.7e18 / 1e18});
+        advisorsBeneficiaries[0] = Beneficiary({
+            account: advisorBeneficiaryA, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.3e18 / 1e18
+        });
+        advisorsBeneficiaries[1] = Beneficiary({
+            account: advisorBeneficiaryB, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.7e18 / 1e18
+        });
 
         Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
-        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
+        ecosystemBeneficiaries[0] =
+            Beneficiary({account: ecosystemBeneficiary, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
 
         Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
-        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
+        liquidityBeneficiaries[0] =
+            Beneficiary({account: liquidityBeneficiary, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
 
         Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
-        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
+        reserveBeneficiaries[0] =
+            Beneficiary({account: reserveBeneficiary, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
 
         beneficiaries = [
             seedBeneficiaries,

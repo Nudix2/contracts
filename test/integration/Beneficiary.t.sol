@@ -97,7 +97,10 @@ contract BeneficiaryTest is Test {
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedAmount);
         assertEq(nudix.balanceOf(migration), getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - expectedAmount);
-        assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedAmount);
+        assertEq(
+            IMigrationImpl(migration).lockedOf(communityBeneficiary),
+            COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedAmount
+        );
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
     }
@@ -109,7 +112,8 @@ contract BeneficiaryTest is Test {
         Schedule memory schedule = vestingParams.getSchedule(VestingType.COMMUNITY_ROUND);
 
         // Skip tge and cliff
-        uint40 halfOfTheFirstPeriodTimestamp = schedule.periods[2].endTime - (schedule.periods[2].endTime - schedule.periods[1].endTime) / 2;
+        uint40 halfOfTheFirstPeriodTimestamp =
+            schedule.periods[2].endTime - (schedule.periods[2].endTime - schedule.periods[1].endTime) / 2;
         vm.warp(halfOfTheFirstPeriodTimestamp);
 
         uint256 availableToClaimAmount = IMigrationImpl(migration).availableToClaim(communityBeneficiary);
@@ -122,11 +126,18 @@ contract BeneficiaryTest is Test {
         vm.stopPrank();
 
         uint256 expectedTgeAmount = COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[0].portion / BASIS_POINTS;
-        uint256 expectedHalfOnTheFirstPeriodAmount = expectedTgeAmount + COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[2].portion / BASIS_POINTS / 2;
+        uint256 expectedHalfOnTheFirstPeriodAmount =
+            expectedTgeAmount + COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[2].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedHalfOnTheFirstPeriodAmount);
-        assertEq(nudix.balanceOf(migration), getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - expectedHalfOnTheFirstPeriodAmount);
-        assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheFirstPeriodAmount);
+        assertEq(
+            nudix.balanceOf(migration),
+            getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - expectedHalfOnTheFirstPeriodAmount
+        );
+        assertEq(
+            IMigrationImpl(migration).lockedOf(communityBeneficiary),
+            COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheFirstPeriodAmount
+        );
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedHalfOnTheFirstPeriodAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
     }
@@ -139,7 +150,8 @@ contract BeneficiaryTest is Test {
 
         // Skip tge and cliff
         uint256 lastPeriodIndex = schedule.periods.length - 1;
-        uint40 halfOfTheLastPeriodTimestamp = schedule.periods[lastPeriodIndex].endTime - (schedule.periods[lastPeriodIndex].endTime - schedule.periods[lastPeriodIndex - 1].endTime) / 2;
+        uint40 halfOfTheLastPeriodTimestamp = schedule.periods[lastPeriodIndex].endTime
+            - (schedule.periods[lastPeriodIndex].endTime - schedule.periods[lastPeriodIndex - 1].endTime) / 2;
         vm.warp(halfOfTheLastPeriodTimestamp);
 
         uint256 availableToClaimAmount = IMigrationImpl(migration).availableToClaim(communityBeneficiary);
@@ -151,11 +163,18 @@ contract BeneficiaryTest is Test {
 
         vm.stopPrank();
 
-        uint256 expectedHalfOnTheLastPeriodAmount = COMMUNITY_ROUND_BENEFICIARY_AMOUNT - COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS / 2;
+        uint256 expectedHalfOnTheLastPeriodAmount = COMMUNITY_ROUND_BENEFICIARY_AMOUNT
+            - COMMUNITY_ROUND_BENEFICIARY_AMOUNT * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(communityBeneficiary), expectedHalfOnTheLastPeriodAmount);
-        assertEq(nudix.balanceOf(migration), getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - expectedHalfOnTheLastPeriodAmount);
-        assertEq(IMigrationImpl(migration).lockedOf(communityBeneficiary), COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheLastPeriodAmount);
+        assertEq(
+            nudix.balanceOf(migration),
+            getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - expectedHalfOnTheLastPeriodAmount
+        );
+        assertEq(
+            IMigrationImpl(migration).lockedOf(communityBeneficiary),
+            COMMUNITY_ROUND_BENEFICIARY_AMOUNT - expectedHalfOnTheLastPeriodAmount
+        );
         assertEq(IMigrationImpl(migration).unlockedOf(communityBeneficiary), expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(migration).availableToClaim(communityBeneficiary), 0);
     }
@@ -186,11 +205,15 @@ contract BeneficiaryTest is Test {
         IVestingImpl(vesting).claim();
 
         Schedule memory schedule = vestingParams.getSchedule(VestingType.TEAM);
-        uint256 expectedAmount = getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[0].portion / BASIS_POINTS;
+        uint256 expectedAmount =
+            getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[0].portion / BASIS_POINTS;
 
         assertEq(nudix.balanceOf(teamBeneficiary), expectedAmount);
         assertEq(nudix.balanceOf(vesting), getTotalAmountByVestingType(VestingType.TEAM) - expectedAmount);
-        assertEq(IMigrationImpl(vesting).lockedOf(teamBeneficiary), getTotalAmountByVestingType(VestingType.TEAM) - expectedAmount);
+        assertEq(
+            IMigrationImpl(vesting).lockedOf(teamBeneficiary),
+            getTotalAmountByVestingType(VestingType.TEAM) - expectedAmount
+        );
         assertEq(IMigrationImpl(vesting).unlockedOf(teamBeneficiary), expectedAmount);
         assertEq(IMigrationImpl(vesting).availableToClaim(teamBeneficiary), 0);
     }
@@ -201,18 +224,26 @@ contract BeneficiaryTest is Test {
         Schedule memory schedule = vestingParams.getSchedule(VestingType.TEAM);
 
         // Skip tge and cliff
-        uint40 halfOfTheFirstPeriodTimestamp = schedule.periods[1].endTime - (schedule.periods[1].endTime - schedule.periods[0].endTime) / 2;
+        uint40 halfOfTheFirstPeriodTimestamp =
+            schedule.periods[1].endTime - (schedule.periods[1].endTime - schedule.periods[0].endTime) / 2;
         vm.warp(halfOfTheFirstPeriodTimestamp);
 
         vm.prank(teamBeneficiary);
         IMigrationImpl(vesting).claim();
 
-        uint256 expectedTgeAmount = getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[0].portion / BASIS_POINTS;
-        uint256 expectedHalfOnTheFirstPeriodAmount = expectedTgeAmount + getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[2].portion / BASIS_POINTS / 2;
+        uint256 expectedTgeAmount =
+            getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[0].portion / BASIS_POINTS;
+        uint256 expectedHalfOnTheFirstPeriodAmount = expectedTgeAmount + getTotalAmountByVestingType(VestingType.TEAM)
+            * schedule.periods[2].portion / BASIS_POINTS / 2;
 
         assertEq(nudix.balanceOf(teamBeneficiary), expectedHalfOnTheFirstPeriodAmount);
-        assertEq(nudix.balanceOf(vesting), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheFirstPeriodAmount);
-        assertEq(IMigrationImpl(vesting).lockedOf(teamBeneficiary), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheFirstPeriodAmount);
+        assertEq(
+            nudix.balanceOf(vesting), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheFirstPeriodAmount
+        );
+        assertEq(
+            IMigrationImpl(vesting).lockedOf(teamBeneficiary),
+            getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheFirstPeriodAmount
+        );
         assertEq(IMigrationImpl(vesting).unlockedOf(teamBeneficiary), expectedHalfOnTheFirstPeriodAmount);
         assertEq(IMigrationImpl(vesting).availableToClaim(teamBeneficiary), 0);
     }
@@ -225,17 +256,25 @@ contract BeneficiaryTest is Test {
 
         // Skip tge and cliff
         uint256 lastPeriodIndex = schedule.periods.length - 1;
-        uint40 halfOfTheLastPeriodTimestamp = schedule.periods[lastPeriodIndex].endTime - (schedule.periods[lastPeriodIndex].endTime - schedule.periods[lastPeriodIndex - 1].endTime) / 2;
+        uint40 halfOfTheLastPeriodTimestamp = schedule.periods[lastPeriodIndex].endTime
+            - (schedule.periods[lastPeriodIndex].endTime - schedule.periods[lastPeriodIndex - 1].endTime) / 2;
         vm.warp(halfOfTheLastPeriodTimestamp);
 
         vm.prank(teamBeneficiary);
         IMigrationImpl(vesting).claim();
 
-        uint256 expectedHalfOnTheLastPeriodAmount = getTotalAmountByVestingType(VestingType.TEAM) - getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS / 2;
+        uint256 expectedHalfOnTheLastPeriodAmount = getTotalAmountByVestingType(VestingType.TEAM)
+            - getTotalAmountByVestingType(VestingType.TEAM) * schedule.periods[lastPeriodIndex].portion / BASIS_POINTS
+            / 2;
 
         assertEq(nudix.balanceOf(teamBeneficiary), expectedHalfOnTheLastPeriodAmount);
-        assertEq(nudix.balanceOf(vesting), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheLastPeriodAmount);
-        assertEq(IMigrationImpl(vesting).lockedOf(teamBeneficiary), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheLastPeriodAmount);
+        assertEq(
+            nudix.balanceOf(vesting), getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheLastPeriodAmount
+        );
+        assertEq(
+            IMigrationImpl(vesting).lockedOf(teamBeneficiary),
+            getTotalAmountByVestingType(VestingType.TEAM) - expectedHalfOnTheLastPeriodAmount
+        );
         assertEq(IMigrationImpl(vesting).unlockedOf(teamBeneficiary), expectedHalfOnTheLastPeriodAmount);
         assertEq(IMigrationImpl(vesting).availableToClaim(teamBeneficiary), 0);
     }
@@ -258,7 +297,9 @@ contract BeneficiaryTest is Test {
         migrationImpl = new MigrationImpl();
 
         // Simulate that temporary Nudix was minted and sold during public sale
-        _mintTemporaryNudix(address(this), getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
+        _mintTemporaryNudix(
+            address(this), getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND) - COMMUNITY_ROUND_BENEFICIARY_AMOUNT
+        );
         _mintTemporaryNudix(communityBeneficiary, COMMUNITY_ROUND_BENEFICIARY_AMOUNT);
 
         // Stage 3. Deploy Distributor contract
@@ -280,31 +321,41 @@ contract BeneficiaryTest is Test {
 
     function _getBeneficiaries() private view returns (Beneficiary[][8] memory beneficiaries) {
         Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
-        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
+        seedBeneficiaries[0] =
+            Beneficiary({account: seedBeneficiary, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
 
         Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
-        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)});
+        strategicBeneficiaries[0] = Beneficiary({
+            account: strategicBeneficiary, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)
+        });
 
         Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
-        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: getTotalAmountByVestingType(VestingType.IDO)});
+        idoBeneficiaries[0] =
+            Beneficiary({account: idoBeneficiary, amount: getTotalAmountByVestingType(VestingType.IDO)});
 
         Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
-        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: getTotalAmountByVestingType(VestingType.TEAM)});
+        teamBeneficiaries[0] =
+            Beneficiary({account: teamBeneficiary, amount: getTotalAmountByVestingType(VestingType.TEAM)});
 
         Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](2);
-        advisorsBeneficiaries[0] =
-            Beneficiary({account: advisorBeneficiaryA, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.3e18 / 1e18});
-        advisorsBeneficiaries[1] =
-            Beneficiary({account: advisorBeneficiaryB, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.7e18 / 1e18});
+        advisorsBeneficiaries[0] = Beneficiary({
+            account: advisorBeneficiaryA, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.3e18 / 1e18
+        });
+        advisorsBeneficiaries[1] = Beneficiary({
+            account: advisorBeneficiaryB, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.7e18 / 1e18
+        });
 
         Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
-        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
+        ecosystemBeneficiaries[0] =
+            Beneficiary({account: ecosystemBeneficiary, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
 
         Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
-        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
+        liquidityBeneficiaries[0] =
+            Beneficiary({account: liquidityBeneficiary, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
 
         Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
-        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
+        reserveBeneficiaries[0] =
+            Beneficiary({account: reserveBeneficiary, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
 
         beneficiaries = [
             seedBeneficiaries,

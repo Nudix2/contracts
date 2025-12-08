@@ -2,13 +2,7 @@
 pragma solidity 0.8.25;
 
 import {IVestingParams} from "./interfaces/IVestingParams.sol";
-import {
-    VestingType,
-    Beneficiary,
-    Schedule,
-    Period,
-    getTotalAmountByVestingType
-} from "./utils/Common.sol";
+import {VestingType, Beneficiary, Schedule, Period, getTotalAmountByVestingType} from "./utils/Common.sol";
 
 /**
  * @title VestingParams

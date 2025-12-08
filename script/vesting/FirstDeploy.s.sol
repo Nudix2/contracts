@@ -9,11 +9,7 @@ import {MigrationImpl} from "src/vesting/MigrationImpl.sol";
 import {Distributor} from "src/vesting/Distributor.sol";
 import {Nudix} from "src/Nudix.sol";
 
-import {
-    Beneficiary,
-    VestingType,
-    getTotalAmountByVestingType
-} from "src/vesting/utils/Common.sol";
+import {Beneficiary, VestingType, getTotalAmountByVestingType} from "src/vesting/utils/Common.sol";
 
 contract FirstDeployScript is Script {
     // TODO: set up beneficiaries before deployment
@@ -50,11 +46,7 @@ contract FirstDeployScript is Script {
 
         // Stage 3. Deploy Distributor contract
         distributor = new Distributor(
-            address(vestingParams),
-            address(vestingImpl),
-            address(migrationImpl),
-            address(temporaryNudix),
-            sweepAccount
+            address(vestingParams), address(vestingImpl), address(migrationImpl), address(temporaryNudix), sweepAccount
         );
 
         // Stage 4. Deploy Nudix contract and mint to the distributor contract
@@ -74,28 +66,43 @@ contract FirstDeployScript is Script {
 
     function _getBeneficiaries() private pure returns (Beneficiary[][8] memory beneficiaries) {
         Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
-        seedBeneficiaries[0] = Beneficiary({account: SEED_ROUND_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
+        seedBeneficiaries[0] = Beneficiary({
+            account: SEED_ROUND_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)
+        });
 
         Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
-        strategicBeneficiaries[0] = Beneficiary({account: STRATEGIC_ROUND_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)});
+        strategicBeneficiaries[0] = Beneficiary({
+            account: STRATEGIC_ROUND_BENEFICIARY_ADDRESS,
+            amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)
+        });
 
         Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
-        idoBeneficiaries[0] = Beneficiary({account: IDO_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.IDO)});
+        idoBeneficiaries[0] =
+            Beneficiary({account: IDO_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.IDO)});
 
         Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
-        teamBeneficiaries[0] = Beneficiary({account: TEAM_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.TEAM)});
+        teamBeneficiaries[0] =
+            Beneficiary({account: TEAM_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.TEAM)});
 
         Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](1);
-        advisorsBeneficiaries[0] = Beneficiary({account: ADVISER_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.ADVISORS)});
+        advisorsBeneficiaries[0] = Beneficiary({
+            account: ADVISER_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.ADVISORS)
+        });
 
         Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
-        ecosystemBeneficiaries[0] = Beneficiary({account: ECOSYSTEM_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
+        ecosystemBeneficiaries[0] = Beneficiary({
+            account: ECOSYSTEM_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)
+        });
 
         Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
-        liquidityBeneficiaries[0] = Beneficiary({account: LIQUIDITY_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
+        liquidityBeneficiaries[0] = Beneficiary({
+            account: LIQUIDITY_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)
+        });
 
         Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
-        reserveBeneficiaries[0] = Beneficiary({account: RESERVE_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
+        reserveBeneficiaries[0] = Beneficiary({
+            account: RESERVE_BENEFICIARY_ADDRESS, amount: getTotalAmountByVestingType(VestingType.RESERVE)
+        });
 
         beneficiaries = [
             seedBeneficiaries,
