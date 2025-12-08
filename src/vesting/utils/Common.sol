@@ -42,3 +42,41 @@ uint256 constant ADVISORS_TOTAL_AMOUNT = 60_000_000e18;
 uint256 constant ECOSYSTEM_TOTAL_AMOUNT = 200_000_000e18;
 uint256 constant LIQUIDITY_TOTAL_AMOUNT = 150_000_000e18;
 uint256 constant RESERVE_TOTAL_AMOUNT = 200_000_000e18;
+
+function getTotalAmountByVestingType(VestingType vestingType) pure returns (uint256 totalAmount) {
+    if (vestingType == VestingType.COMMUNITY_ROUND) {
+        totalAmount = COMMUNITY_ROUND_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.SEED_ROUND) {
+        totalAmount = SEED_ROUND_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.STRATEGIC_ROUND) {
+        totalAmount = STRATEGIC_ROUND_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.IDO) {
+        totalAmount = IDO_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.TEAM) {
+        totalAmount = TEAM_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.ADVISORS) {
+        totalAmount = ADVISORS_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.ECOSYSTEM) {
+        totalAmount = ECOSYSTEM_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.LIQUIDITY) {
+        totalAmount = LIQUIDITY_TOTAL_AMOUNT;
+    }
+
+    if (vestingType == VestingType.RESERVE) {
+        totalAmount = RESERVE_TOTAL_AMOUNT;
+    }
+}

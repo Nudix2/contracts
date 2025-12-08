@@ -7,15 +7,7 @@ import {
     Beneficiary,
     Schedule,
     Period,
-    COMMUNITY_ROUND_TOTAL_AMOUNT,
-    SEED_ROUND_TOTAL_AMOUNT,
-    STRATEGIC_ROUND_TOTAL_AMOUNT,
-    IDO_TOTAL_AMOUNT,
-    TEAM_TOTAL_AMOUNT,
-    ADVISORS_TOTAL_AMOUNT,
-    ECOSYSTEM_TOTAL_AMOUNT,
-    LIQUIDITY_TOTAL_AMOUNT,
-    RESERVE_TOTAL_AMOUNT
+    getTotalAmountByVestingType
 } from "./utils/Common.sol";
 
 /**
@@ -55,7 +47,7 @@ contract VestingParams is IVestingParams {
         view
         returns (Schedule memory, Beneficiary[] memory, uint256)
     {
-        return (getSchedule(vestingType), getBeneficiaries(vestingType), _getTotalAmountByVestingType(vestingType));
+        return (getSchedule(vestingType), getBeneficiaries(vestingType), getTotalAmountByVestingType(vestingType));
     }
 
     /**
@@ -162,48 +154,9 @@ contract VestingParams is IVestingParams {
             _beneficiaries[vestingType].push(beneficiary);
         }
 
-        uint256 expectedTotalAmount = _getTotalAmountByVestingType(vestingType);
+        uint256 expectedTotalAmount = getTotalAmountByVestingType(vestingType);
         if (totalAmount != expectedTotalAmount) {
             revert IncorrectBeneficiaryAmounts();
-        }
-    }
-
-    // TODO: move to common
-    function _getTotalAmountByVestingType(VestingType vestingType) private pure returns (uint256 totalAmount) {
-        if (vestingType == VestingType.COMMUNITY_ROUND) {
-            totalAmount = COMMUNITY_ROUND_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.SEED_ROUND) {
-            totalAmount = SEED_ROUND_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.STRATEGIC_ROUND) {
-            totalAmount = STRATEGIC_ROUND_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.IDO) {
-            totalAmount = IDO_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.TEAM) {
-            totalAmount = TEAM_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.ADVISORS) {
-            totalAmount = ADVISORS_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.ECOSYSTEM) {
-            totalAmount = ECOSYSTEM_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.LIQUIDITY) {
-            totalAmount = LIQUIDITY_TOTAL_AMOUNT;
-        }
-
-        if (vestingType == VestingType.RESERVE) {
-            totalAmount = RESERVE_TOTAL_AMOUNT;
         }
     }
 

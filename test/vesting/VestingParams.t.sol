@@ -11,15 +11,7 @@ import {
     Period,
     VestingType,
     NUMBER_OF_VESTING_TYPES,
-    COMMUNITY_ROUND_TOTAL_AMOUNT,
-    SEED_ROUND_TOTAL_AMOUNT,
-    STRATEGIC_ROUND_TOTAL_AMOUNT,
-    IDO_TOTAL_AMOUNT,
-    TEAM_TOTAL_AMOUNT,
-    ADVISORS_TOTAL_AMOUNT,
-    ECOSYSTEM_TOTAL_AMOUNT,
-    LIQUIDITY_TOTAL_AMOUNT,
-    RESERVE_TOTAL_AMOUNT
+    getTotalAmountByVestingType
 } from "src/vesting/utils/Common.sol";
 
 contract VestingParamsTest is Test {
@@ -143,15 +135,15 @@ contract VestingParamsTest is Test {
 
         assertEq(
             nudix.totalSupply(),
-            COMMUNITY_ROUND_TOTAL_AMOUNT
-                + SEED_ROUND_TOTAL_AMOUNT
-                + STRATEGIC_ROUND_TOTAL_AMOUNT
-                + IDO_TOTAL_AMOUNT
-                + TEAM_TOTAL_AMOUNT
-                + ADVISORS_TOTAL_AMOUNT
-                + ECOSYSTEM_TOTAL_AMOUNT
-                + LIQUIDITY_TOTAL_AMOUNT
-                + RESERVE_TOTAL_AMOUNT
+            getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND)
+                + getTotalAmountByVestingType(VestingType.SEED_ROUND)
+                + getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)
+                + getTotalAmountByVestingType(VestingType.IDO)
+                + getTotalAmountByVestingType(VestingType.TEAM)
+                + getTotalAmountByVestingType(VestingType.ADVISORS)
+                + getTotalAmountByVestingType(VestingType.ECOSYSTEM)
+                + getTotalAmountByVestingType(VestingType.LIQUIDITY)
+                + getTotalAmountByVestingType(VestingType.RESERVE)
         );
     }
     // endregion
@@ -221,31 +213,31 @@ contract VestingParamsTest is Test {
 
     function _getBeneficiaries() private view returns (Beneficiary[][8] memory beneficiaries) {
         Beneficiary[] memory seedBeneficiaries = new Beneficiary[](1);
-        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: SEED_ROUND_TOTAL_AMOUNT});
+        seedBeneficiaries[0] = Beneficiary({account: seedBeneficiary, amount: getTotalAmountByVestingType(VestingType.SEED_ROUND)});
 
         Beneficiary[] memory strategicBeneficiaries = new Beneficiary[](1);
-        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: STRATEGIC_ROUND_TOTAL_AMOUNT});
+        strategicBeneficiaries[0] = Beneficiary({account: strategicBeneficiary, amount: getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND)});
 
         Beneficiary[] memory idoBeneficiaries = new Beneficiary[](1);
-        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: IDO_TOTAL_AMOUNT});
+        idoBeneficiaries[0] = Beneficiary({account: idoBeneficiary, amount: getTotalAmountByVestingType(VestingType.IDO)});
 
         Beneficiary[] memory teamBeneficiaries = new Beneficiary[](1);
-        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: TEAM_TOTAL_AMOUNT});
+        teamBeneficiaries[0] = Beneficiary({account: teamBeneficiary, amount: getTotalAmountByVestingType(VestingType.TEAM)});
 
         Beneficiary[] memory advisorsBeneficiaries = new Beneficiary[](2);
         advisorsBeneficiaries[0] =
-            Beneficiary({account: advisorBeneficiaryA, amount: ADVISORS_TOTAL_AMOUNT * 0.3e18 / 1e18});
+            Beneficiary({account: advisorBeneficiaryA, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.3e18 / 1e18});
         advisorsBeneficiaries[1] =
-            Beneficiary({account: advisorBeneficiaryB, amount: ADVISORS_TOTAL_AMOUNT * 0.7e18 / 1e18});
+            Beneficiary({account: advisorBeneficiaryB, amount: getTotalAmountByVestingType(VestingType.ADVISORS) * 0.7e18 / 1e18});
 
         Beneficiary[] memory ecosystemBeneficiaries = new Beneficiary[](1);
-        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: ECOSYSTEM_TOTAL_AMOUNT});
+        ecosystemBeneficiaries[0] = Beneficiary({account: ecosystemBeneficiary, amount: getTotalAmountByVestingType(VestingType.ECOSYSTEM)});
 
         Beneficiary[] memory liquidityBeneficiaries = new Beneficiary[](1);
-        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: LIQUIDITY_TOTAL_AMOUNT});
+        liquidityBeneficiaries[0] = Beneficiary({account: liquidityBeneficiary, amount: getTotalAmountByVestingType(VestingType.LIQUIDITY)});
 
         Beneficiary[] memory reserveBeneficiaries = new Beneficiary[](1);
-        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: RESERVE_TOTAL_AMOUNT});
+        reserveBeneficiaries[0] = Beneficiary({account: reserveBeneficiary, amount: getTotalAmountByVestingType(VestingType.RESERVE)});
 
         beneficiaries = [
             seedBeneficiaries,
@@ -261,39 +253,39 @@ contract VestingParamsTest is Test {
 
     function _getTotalAmount(VestingType vestingType) private pure returns (uint256 totalAmount) {
         if (vestingType == VestingType.COMMUNITY_ROUND) {
-            totalAmount = COMMUNITY_ROUND_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.COMMUNITY_ROUND);
         }
 
         if (vestingType == VestingType.SEED_ROUND) {
-            totalAmount = SEED_ROUND_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.SEED_ROUND);
         }
 
         if (vestingType == VestingType.STRATEGIC_ROUND) {
-            totalAmount = STRATEGIC_ROUND_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.STRATEGIC_ROUND);
         }
 
         if (vestingType == VestingType.IDO) {
-            totalAmount = IDO_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.IDO);
         }
 
         if (vestingType == VestingType.TEAM) {
-            totalAmount = TEAM_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.TEAM);
         }
 
         if (vestingType == VestingType.ADVISORS) {
-            totalAmount = ADVISORS_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.ADVISORS);
         }
 
         if (vestingType == VestingType.ECOSYSTEM) {
-            totalAmount = ECOSYSTEM_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.ECOSYSTEM);
         }
 
         if (vestingType == VestingType.LIQUIDITY) {
-            totalAmount = LIQUIDITY_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.LIQUIDITY);
         }
 
         if (vestingType == VestingType.RESERVE) {
-            totalAmount = RESERVE_TOTAL_AMOUNT;
+            totalAmount = getTotalAmountByVestingType(VestingType.RESERVE);
         }
     }
 
