@@ -1,25 +1,48 @@
 # Nudix
-// TODO: rewrite readme
 
-The Nudix project is conducting an early public sale of the T-NUDIX token. The T-NUDIX token is temporary. We anticipate that in the future, a dedicated smart contract will be developed to allow the exchange of the temporary token for the actual NUDIX token.
+The Nudix project is conducting an early public sale of the T-NUDIX token and vesting NUDIX token.
 
 ## Smart Contract Overview
 
 Two smart contracts have been implemented:
 
-- [Nudix.sol](./src/Nudix.sol). ERC-20 standard permanent protocol token.
-- [TemporaryNudix.sol](./src/TemporaryNudix.sol). ERC-20 standard temporary token.
-- [NudixSale](./src/NudixSale.sol). A public sale process for the temporary token.
+**Public Sale:**
+- [TemporaryNudix.sol](./src/publicSale/TemporaryNudix.sol). ERC-20 standard temporary token.
+- [NudixSale](./src/publicSale/NudixSale.sol). A public sale process for the temporary token.
 
-### Audits
+**Vesting:**
+- [Distributor](./src/vesting/Distributor.sol). Maincontract of the locking NUDIX token after minting. Createvesting contracts and distribute NUDIX to them.
+- [MigrationImpl](./src/vesting/MigrationImpl.sol). Implementation of the vesting for community round
+- [VestingImpl](./src/vesting/VestingImpl.sol). Implementation of the vesting for other allocation groups(liquidity, team, ecosystem, etc)
+- [VestingParams](./src/vesting/VestingParams.sol). Params of the vesting for creating
+
+**Token:**
+- [Nudix.sol](./src/Nudix.sol). ERC-20 standard permanent protocol token.
+
+## Audits
 
 You can find audit report under the audits folder:
 
+**Public Sale:**
 - [Beosin](./audits/Beosin.pdf) (May 29th, 2025)
 
-### Nudix overview
+### Build and test
+
+The project was implemented using the [Foundry framework](https://book.getfoundry.sh/).
+
+```shell
+$ forge build
+```
+
+```shell
+$ forge test
+```
+
+## Nudix overview
 
 Smart contract implements a simple fungible protocol token. Which in the future will be issued to users in place of a T-NUDIX. ERC-2612: Permit extension for EIP-20 signed approvals support added.
+
+## Public sale
 
 ### TemporaryNudix overview
 
@@ -63,20 +86,6 @@ Therefore:
   - If USDT has 6 decimals, use roundRate = 1e6 for a 1:1 exchange
   - If USDT has 18 decimals, use roundRate = 1e18
 
-## Usage
-
-The project was implemented using the [Foundry framework](https://book.getfoundry.sh/).
-
-### Build and test
-
-```shell
-$ forge build
-```
-
-```shell
-$ forge test
-```
-
 ### Deploy
 
 Deployment of smart contracts is supposed to be via a deployment script from `/script` folder.
@@ -114,15 +123,49 @@ forge script script/publicSale/StartNudixSale.s.sol --rpc-url <RPC_URL> --slow -
 
 Important! You may need to add the 0x prefix to the private key (in .env file - 6070) before running the deployment scripts.
 
-Deploy
-1. set up beneficiaries into deploy script
-2. call script
-   ```shell
-       forge script script/vesting/FirstDeploy.s.sol:FirstDeployScript --rpc-url bnb-testnet --broadcast --sig "run(address, address)" "<Temporary nudix address>" "Sweep account>" --slow --verify -vvvv --interactives 1
-   ```
-      For BNB Smart Chain Testnet: forge script script/dev/DeployTemporaryNudix.s.sol:DeployTemporaryNudixScript --rpc-url bnb-testnet --broadcast --slow --verify -vvvv --interactives 1
-      Temporary nudix token (BnB Smart Chain Mainnet): 0xd2D87c5946a7673297cE4222FFc1BF3a9719ff4C
-3. for t-nudix
-      ```solidity
-      temporaryNudix.addToWhitelist(migration);
-      ```
+## Vesting of the NUDIX token
+
+![](./images/vesting-architechture.png)
+
+The entry point in the diagram is the red circle labeled "Deploy." After deploying NUDIX, its entire supply is sent to the Distributor smart contract. The Distributor receives information about the vesting start time, schedule, and list of beneficiaries for each allocation group from the VestingParams smart contract. Once the vesting start time is reached, any account can call the createVesting() function on the Distributor smart contract to create a separate vesting contract for each allocation group. Along with the creation of such a contract, the allocated amount of NUDIX tokens, as defined by the tokenomics, will be sent to it and unlocked according to the schedule.
+
+### Key Features
+
+1. **Distributor.sol**
+   - Acts as the main contract for managing the distribution of NUDIX tokens.
+   - Responsible for creating vesting contracts for different allocation groups.
+   - Handles the distribution of NUDIX tokens to beneficiaries.
+
+2. **MigrationImpl.sol**
+   - Implements the vesting logic for the community round.
+   - Allows users to claim their vested tokens by burning temporary T-NUDIX tokens.
+   - Includes a claim period, after which unclaimed tokens can be swept to a designated account.
+
+3. **VestingImpl.sol**
+   - Implements vesting for other allocation groups, such as liquidity, team, and ecosystem.
+   - Supports flexible vesting schedules and token locking mechanisms.
+
+4. **VestingParams.sol**
+   - Defines the parameters for creating vesting schedules.
+   - Includes details such as start time, duration, and percentage allocations for each vesting period.
+
+### Deploy
+1. Create `.env` file according to `.env.example`.
+2. Set up beneficiaries into deploy script `vesting/FirstDeploy.s.sol`.
+3. Call script
+    ```shell
+    forge script script/vesting/FirstDeploy.s.sol:FirstDeployScript --rpc-url bnb-testnet --broadcast --sig "run(address, address)" "<Temporary nudix address>" "Sweep account>" --slow --verify -vvvv --interactives 1
+    ```
+
+    _Important 1!_
+    1. You can create dev Temporary Nudix token (BnB Smart Chain Testnet)
+    `forge script script/dev/DeployTemporaryNudix.s.sol:DeployTemporaryNudixScript --rpc-url bnb-testnet --broadcast --slow --verify -vvvv --interactives 1`
+    2. Temporary nudix token (BnB Smart Chain Mainnet): `0xd2D87c5946a7673297cE4222FFc1BF3a9719ff4C`
+
+    _Important 2!_
+    **Sweep account** - account that can sweep reminder NUDIX from Migration contract after 1 year.
+
+4. Add address of the migration contract for T-NUDIX, else beneficiaries can't burn their T-NUDIX for claim NUDIX.
+    ```solidity
+    temporaryNudix.addToWhitelist(migration);
+    ```
